@@ -5,6 +5,7 @@ import { fetchAllTable,fetchTablesByStatus } from "../../../../../repository/tab
 import { createTable } from "../../../../../repository/tables/tablecrud";
 import { TableZodSchema } from "../../../../../validation/table/table";
 import { TableStatusEnum } from "../../../../../validation/table/table";
+import { deleteTable } from "../../../../../repository/tables/tablecrud";
 export async function GET(request: NextRequest) {
    try{
     const headersList = await headers();
@@ -52,6 +53,23 @@ export async function POST(request: NextRequest) {
     }
     catch(err){
         console.error(err);
+        return NextResponse.json({ message: "Internal Server Error", error: err,success:false });
+    }
+}
+
+export const DELETE = async (request: NextRequest) => {
+    try{
+        const headersList = await headers();
+        const adminToken = headersList.get("Authorization");
+        const verificationResult = verifyAdminToken(adminToken || "");
+        if (!verificationResult.success) {
+            return NextResponse.json({ message: verificationResult.message, success: false });
+        }
+        const data = await request.json();
+        const response = await deleteTable(data.tableid);
+        return NextResponse.json(response);
+    }
+    catch(err){
         return NextResponse.json({ message: "Internal Server Error", error: err,success:false });
     }
 }
