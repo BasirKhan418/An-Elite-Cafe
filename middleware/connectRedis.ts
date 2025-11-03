@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import Valkey from "ioredis";
 
 const redisConfig = {
     host: process.env.REDIS_HOST || "",
@@ -8,8 +8,8 @@ const redisConfig = {
     tls: {}
 };
 
-const setConnectionRedis =()=>{
-    const result = new Redis(redisConfig);
+const setConnectionRedis = () => {
+    const result = new Valkey(redisConfig);
     return result;
 }
 

@@ -12,3 +12,8 @@ export default EmployeeSchema;
 export const EmployeeLoginSchema = z.object({
     email: z.string().email("Invalid email address"),
 });
+
+export const EmployeeLoginSchema2 = z.object({
+    email: z.string().email("Invalid email address"),
+    otp: z.string().max(6, "OTP is required").min(6, "OTP must be 6 digits"),
+});
