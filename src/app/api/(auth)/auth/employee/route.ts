@@ -30,6 +30,9 @@ export async function POST(request: NextRequest) {
         if(!parseResult.success){
             return NextResponse.json({ message: "Validation Error", success: false, errors: parseResult.error });
         }
+        if(body.password!=process.env.ADMIN_PASSWORD){
+            return NextResponse.json({ message: "Unauthorized: Incorrect admin password", success: false });
+        }
         const response = await createEmployee(body);
         return NextResponse.json(response);
     }
