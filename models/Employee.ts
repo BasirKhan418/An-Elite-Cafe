@@ -6,5 +6,9 @@ const EmployeeSchema = new mongoose.Schema({
     role: { type: String, required: true },
     img: { type: String, required: false },
     token: { type: String, required: false },
+    empid:{ type: String, required: false,default:Date.now().toString() },
+    resname:{ type: String, required: false  ,default:"An Elite Cafe" },
+    joinDate:{ type: Date, required: false , default: new Date() },
+    shift:{ type: String, required: false  ,default:"Morning Shift (9 AM - 5 PM)" },
 }, { timestamps: true })
 export default mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);

@@ -13,7 +13,7 @@ export const createOTPEntry=async (email:string)=>{
         redisClient.on("error", (err) => {
             console.error("Redis connection error:", err);
         });
-        
+
         const checkuser = await Employee.findOne({ email: email });
         if(!checkuser){
             return { message: "Employee not found", success: false };
@@ -53,3 +53,4 @@ export const verifyOTPEntry=async (email:string,otp:string)=>{
         return { success: false, error };
     }
 }
+

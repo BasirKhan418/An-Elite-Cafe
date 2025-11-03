@@ -3,25 +3,6 @@ import EmployeeSchema from "../../../../../../validation/auth/otp";
 import { EmployeeLoginSchema } from "../../../../../../validation/auth/otp";
 import { getEmployeeByEmail,createEmployee } from "../../../../../../repository/auth/employee";
 
-export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const email = searchParams.get("email");
-        if (!email) {
-            return NextResponse.json({ message: "Email is required", success: false });
-        }
-        const parseResult = EmployeeLoginSchema.safeParse({ email });
-        if (!parseResult.success) {
-            return NextResponse.json({ message: "Validation Error", success: false, errors: parseResult.error });
-        }
-        // Fetch employee by email logic here
-        const response = await getEmployeeByEmail(email);  
-        return NextResponse.json(response);
-    }
-    catch (err) {
-        return NextResponse.json({ message: "Internal Server Error", error: err });
-    }
-}
 
 export async function POST(request: NextRequest) {
     try {
