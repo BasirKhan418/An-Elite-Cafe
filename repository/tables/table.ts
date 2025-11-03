@@ -32,3 +32,14 @@ export const fetchTablesByStatus=async(status:string)=>{
         return { message: "Internal Server Error", success: false, error: err };
     }
 }
+
+export const fetchTableById=async(tableid:string)=>{
+    try{
+        await ConnectDb();
+        const table=await Table.find({tableid:tableid});
+        return { message: "Table fetched successfully", success: true, table };
+    }
+    catch(err){
+        return { message: "Internal Server Error", success: false, error: err };
+    }
+}

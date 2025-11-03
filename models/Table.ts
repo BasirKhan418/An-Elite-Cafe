@@ -5,7 +5,7 @@ export enum TableStatus {
     RESERVED = "reserved"
 }
 const TableSchema = new mongoose.Schema({
-id: { type: String, required: true },
+tableid: { type: String, required: true },
 name: { type: String, required: true  },
 capacity: { type: Number, required: true  },
 status: { type: String, required: true  ,default:TableStatus.AVAILABLE },
