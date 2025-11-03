@@ -1,7 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import EmployeeSchema from "../../../../../../validation/auth/otp";
-import { EmployeeLoginSchema } from "../../../../../../validation/auth/otp";
-import { getEmployeeByEmail,createEmployee } from "../../../../../../repository/auth/employee";
+import { createEmployee } from "../../../../../../repository/auth/employee";
 
 
 export async function POST(request: NextRequest) {

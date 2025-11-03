@@ -3,6 +3,8 @@ import { EmployeeLoginSchema } from "../../../../../../validation/auth/otp";
 import { getEmployeeByEmail } from "../../../../../../repository/auth/employee";
 import { verifyAdminToken } from "../../../../../../utils/verify";
 import { headers } from "next/headers";
+import { EmployeeZodSchema } from "../../../../../../validation/auth/otp";
+import { updateEmployee } from "../../../../../../repository/auth/employee";
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
@@ -28,3 +30,25 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message: "Internal Server Error", error: err });
     }
 }
+
+export async function PUT(request: NextRequest) {
+    try{
+        const headersList = await headers();
+        const token = headersList.get("Authorization");
+        const verificationResult = verifyAdminToken(token || "");
+         if (!verificationResult.success) {
+                return NextResponse.json({ message: verificationResult.message, success: false });
+         }
+         const data = await request.json();
+            const parseResult = EmployeeZodSchema.safeParse(data);
+            if (!parseResult.success) {
+                return NextResponse.json({ message: "Validation Error", success: false, errors: parseResult.error });
+            }
+            const response = await updateEmployee(data.email,data);
+            return NextResponse.json(response);
+    }
+    catch(err){
+        return NextResponse.json({ message: "Internal Server Error", error: err });
+    }
+}
+

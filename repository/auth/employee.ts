@@ -21,3 +21,14 @@ export const getEmployeeByEmail=async (email:string)=>{
         return { message: "Internal Server Error", success: false, error: err };
     }
 }
+
+export const updateEmployee =async (email:string,updateData:any)=>{
+    try{
+        await ConnectDb();
+        const employee=await Employee.findOneAndUpdate({email:email},updateData,{new:true});
+        return { message: "Employee updated successfully", success: true, data: employee }; 
+    }
+    catch(err){
+        return { message: "Internal Server Error", success: false, error: err };
+    }
+}

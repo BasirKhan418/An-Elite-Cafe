@@ -2,7 +2,6 @@ import { NextResponse,NextRequest } from "next/server";
 import { verifyAdminToken } from "../../../../../../../utils/verify";
 import { headers } from "next/headers";
 import { fetchTableById } from "../../../../../../../repository/tables/table";
-import { table } from "console";
 export async function GET(request: NextRequest, { params }: { params: { tableid: string } }) {
     try {
         const { tableid } = await params;
