@@ -2,6 +2,7 @@ import { NextResponse,NextRequest } from "next/server";
 import { verifyAdminToken } from "../../../../../../../utils/verify";
 import { headers } from "next/headers";
 import { fetchTableById } from "../../../../../../../repository/tables/table";
+import { updateTableStatus } from "../../../../../../../repository/tables/tablecrud";
 export async function GET(request: NextRequest, { params }: { params: { tableid: string } }) {
     try {
         const { tableid } = await params;
@@ -34,7 +35,8 @@ export async function PUT(request: NextRequest, { params }: { params: { tableid:
             return NextResponse.json({ message: verificationResult.message, success: false });
         }
         //todo:update table status logic here
-        return NextResponse.json({ message: "Update table status functionality not implemented yet", success: false,tableid,data });
+        const response = await updateTableStatus(tableid,data.status);
+        return NextResponse.json(response);
     }
     catch(err){
         return NextResponse.json({ message: "Internal Server Error", error: err, success: false });
