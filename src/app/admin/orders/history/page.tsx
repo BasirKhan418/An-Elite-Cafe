@@ -28,7 +28,6 @@ import OrderDetailsModal from '@/components/admin/OrderDetailsModal';
 import BillingModal from '@/components/admin/BillingModal';
 import type { Order } from '@/types/order';
 import Link from 'next/link';
-
 const HISTORY_STATUSES = {
   served: { 
     label: 'Served', 

@@ -12,7 +12,7 @@ import {
   XCircle,
   Search
 } from 'lucide-react'
-
+import { toast } from 'sonner'
 interface Category {
   _id: string
   categoryid: string
@@ -211,11 +211,11 @@ const MenuManagement: React.FC = () => {
           setMenus(menus.filter(m => m._id !== menu._id))
         } else {
           console.error('Error deleting menu:', data.message)
-          alert(data.message || 'Error deleting menu')
+          toast.error(data.message || 'Error deleting menu')
         }
       } catch (error) {
         console.error('Error deleting menu:', error)
-        alert('Error deleting menu. Please try again.')
+        toast.error('Error deleting menu. Please try again.')
       }
     }
   }
@@ -319,11 +319,11 @@ const MenuManagement: React.FC = () => {
         })
       } else {
         console.error('Error saving menu:', data.message)
-        alert(data.message || 'Error saving menu')
+        toast.error(data.message || 'Error saving menu')
       }
     } catch (error) {
       console.error('Error saving menu:', error)
-      alert('Error saving menu. Please try again.')
+      toast.error('Error saving menu. Please try again.')
     }
   }
 
