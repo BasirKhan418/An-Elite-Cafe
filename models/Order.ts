@@ -51,6 +51,7 @@ const OrderSchema = new mongoose.Schema({
     employeeName: { type: String, required: false },
     orderDate: { type: Date, required: true, default: new Date() },
     completedAt: { type: Date, required: false },
+    isgeneratedBill: { type: Boolean, required: false, default: false },
 }, { timestamps: true });
 
 OrderSchema.index({ tableid: 1 });

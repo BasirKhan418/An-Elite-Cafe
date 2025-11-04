@@ -50,6 +50,7 @@ export const createBill = async (orderId: string, data: any) => {
                 cgst,
                 tax: sgst + cgst, 
                 discount: discountPercentage,
+                isgeneratedBill: true,
             }
         );
 
