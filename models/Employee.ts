@@ -12,4 +12,4 @@ const EmployeeSchema = new mongoose.Schema({
     shift:{ type: String, required: false  ,default:"Morning Shift (9 AM - 5 PM)" },
     isActive: { type: Boolean, required: false, default: true },
 }, { timestamps: true })
-export default mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);
+export default mongoose.models?.Employee || mongoose.model('Employee', EmployeeSchema);

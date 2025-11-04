@@ -57,4 +57,4 @@ OrderSchema.index({ status: 1 });
 OrderSchema.index({ orderDate: -1 });
 OrderSchema.index({ paymentStatus: 1 });
 
-export default mongoose.models.Order || mongoose.model('Order', OrderSchema);
+export default mongoose.models?.Order || mongoose.model('Order', OrderSchema);

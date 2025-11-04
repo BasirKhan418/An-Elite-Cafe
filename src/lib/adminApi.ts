@@ -1,4 +1,3 @@
-// API utility functions for admin operations
 export class AdminAPI {
   private static getAuthHeaders() {
     const token = localStorage.getItem('adminToken')

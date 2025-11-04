@@ -4,4 +4,4 @@ const CategorySchema = new mongoose.Schema({
     categoryid: { type: String, required: true, unique: true },
     icon: { type: String, required: false  },
 }, { timestamps: true })
-export default mongoose.models.Category || mongoose.model('Category', CategorySchema);
+export default mongoose.models?.Category || mongoose.model('Category', CategorySchema);
