@@ -58,7 +58,7 @@ export const updateOrder = async (orderid: string, data: any) => {
 export const getAllOrders = async () => {
     try {
 
-        const orders = await Order.find();
+        const orders = await Order.find().populate('items.menuid');
         return { success: true, orders };
     } catch (error) {
         return { success: false, error, message: "Failed to fetch orders" };
@@ -71,7 +71,7 @@ export const getOrderbyDate = async (date: string) => {
         start.setHours(0, 0, 0, 0);
         const end = new Date(date);
         end.setHours(23, 59, 59, 999);
-        const orders = await Order.find({ orderDate: { $gte: start, $lte: end } });
+        const orders = await Order.find({ orderDate: { $gte: start, $lte: end } }).populate('items.menuid');
         return { success: true, orders };
     } catch (error) {
         return { success: false, error, message: "Failed to fetch orders by date" };
@@ -79,7 +79,7 @@ export const getOrderbyDate = async (date: string) => {
 }
 export const getOrderbyStatus = async (status: string) => {
     try {
-        const orders = await Order.find({ status: status });
+        const orders = await Order.find({ status: status }).populate('items.menuid');
         return { success: true, orders };
     } catch (error) {
         return { success: false, error, message: "Failed to fetch orders by status" };
@@ -92,7 +92,7 @@ export const getOrderbyDateAndStatus = async (date: string, status: string) => {
         start.setHours(0, 0, 0, 0);
         const end = new Date(date);
         end.setHours(23, 59, 59, 999);
-        const orders = await Order.find({ orderDate: { $gte: start, $lte: end }, status: status });
+        const orders = await Order.find({ orderDate: { $gte: start, $lte: end }, status: status }).populate('items.menuid');
         return { success: true, orders };
     } catch (error) {
         return { success: false, error, message: "Failed to fetch orders by date and status" };
