@@ -21,7 +21,8 @@ import {
   Package,
   ChevronDown,
   ShoppingCart,
-  ChefHat
+  ChefHat,
+  Shield
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -42,6 +43,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
   const { adminData, logout } = useAdminAuth()
+
+  // Check if user is super admin (case-insensitive check)
+  const isSuperAdmin = adminData?.role?.toLowerCase() === 'super_admin'
 
   const navigationItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
@@ -69,6 +73,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
       ]
     },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, href: '/admin/analytics' },
+    ...(isSuperAdmin ? [{ id: 'admins', label: 'Admin Management', icon: Shield, href: '/admin/admins' }] : []),
     { id: 'settings', label: 'Settings', icon: Settings, href: '/admin/settings' },
   ]
 

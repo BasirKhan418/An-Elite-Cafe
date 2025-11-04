@@ -92,6 +92,50 @@ export const AdminChangePasswordSchema = z.object({
                "Password must contain at least one uppercase letter, lowercase letter, number, and special character")
 });
 
+export const CreateAdminBySuperAdminSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Invalid email format"),
+    password: z.string()
+        .min(8, "Password must be at least 8 characters")
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+               "Password must contain at least one uppercase letter, lowercase letter, number, and special character"),
+    role: z.literal(AdminRole.ADMIN), 
+    permissions: z.array(z.enum([
+        AdminPermissions.MANAGE_EMPLOYEES,
+        AdminPermissions.MANAGE_TABLES,
+        AdminPermissions.VIEW_ORDERS,
+        AdminPermissions.MANAGE_ORDERS,
+        AdminPermissions.MANAGE_INVENTORY,
+        AdminPermissions.VIEW_ANALYTICS,
+        AdminPermissions.SYSTEM_SETTINGS
+    ])),
+    img: z.preprocess(
+        (val) => val === "" ? undefined : val,
+        z.string().url().optional()
+    )
+});
+
+export const UpdateAdminBySuperAdminSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters").optional(),
+    username: z.string().min(3, "Username must be at least 3 characters").optional(),
+    email: z.string().email("Invalid email format").optional(),
+    permissions: z.array(z.enum([
+        AdminPermissions.MANAGE_EMPLOYEES,
+        AdminPermissions.MANAGE_TABLES,
+        AdminPermissions.VIEW_ORDERS,
+        AdminPermissions.MANAGE_ORDERS,
+        AdminPermissions.MANAGE_INVENTORY,
+        AdminPermissions.VIEW_ANALYTICS,
+        AdminPermissions.SYSTEM_SETTINGS
+    ])).optional(),
+    img: z.preprocess(
+        (val) => val === "" ? undefined : val,
+        z.string().url().optional()
+    ),
+    isActive: z.boolean().optional()
+});
+
 export type AdminLoginData = z.infer<typeof AdminLoginSchema>;
 export type AdminRegistrationData = z.infer<typeof AdminRegistrationSchema>;
 export type AdminUpdateData = z.infer<typeof AdminUpdateSchema>;
@@ -100,3 +144,5 @@ export type TableManagementData = z.infer<typeof TableManagementSchema>;
 export type AdminSendOTPData = z.infer<typeof AdminSendOTPSchema>;
 export type AdminVerifyOTPData = z.infer<typeof AdminVerifyOTPSchema>;
 export type AdminChangePasswordData = z.infer<typeof AdminChangePasswordSchema>;
+export type CreateAdminBySuperAdminData = z.infer<typeof CreateAdminBySuperAdminSchema>;
+export type UpdateAdminBySuperAdminData = z.infer<typeof UpdateAdminBySuperAdminSchema>;

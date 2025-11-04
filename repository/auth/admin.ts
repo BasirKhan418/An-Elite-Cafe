@@ -283,3 +283,179 @@ export const changeAdminPassword = async (email: string, otp: string, newPasswor
         return { message: "Internal Server Error", success: false, error };
     }
 };
+
+// Super Admin Functions for Admin Management
+
+export const getAllAdminsForSuperAdmin = async () => {
+    try {
+        await ConnectDb();
+        
+        // Get all admins excluding super admins
+        const admins = await Admin.find({ 
+            role: { $ne: "super_admin" }
+        })
+            .select('-password -token')
+            .sort({ createdAt: -1 });
+        
+        return { 
+            message: "Admins fetched successfully", 
+            success: true, 
+            data: admins
+        };
+    } catch (err) {
+        return { message: "Internal Server Error", success: false, error: err };
+    }
+};
+
+export const createAdminBySuperAdmin = async (adminData: any, createdBy: string) => {
+    try {
+        await ConnectDb();
+        
+        // Check if email or username already exists
+        const existingAdmin = await Admin.findOne({
+            $or: [
+                { email: adminData.email },
+                { username: adminData.username }
+            ]
+        });
+
+        if (existingAdmin) {
+            const field = existingAdmin.email === adminData.email ? 'email' : 'username';
+            return { 
+                message: `Admin with this ${field} already exists`, 
+                success: false 
+            };
+        }
+        
+        const saltRounds = 12;
+        const hashedPassword = await bcrypt.hash(adminData.password, saltRounds);
+        
+        const admin = await Admin.create({
+            ...adminData,
+            password: hashedPassword,
+            role: "admin", // Force role to be admin
+            createdBy: createdBy
+        });
+
+        const { password, token, ...adminResponse } = admin.toObject();
+        
+        return { 
+            message: "Admin created successfully", 
+            success: true, 
+            data: adminResponse 
+        };
+    } catch (err: any) {
+        console.error("Error creating admin:", err);
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyPattern)[0];
+            return { 
+                message: `Admin with this ${field} already exists`, 
+                success: false 
+            };
+        }
+        return { 
+            message: "Internal Server Error", 
+            success: false, 
+            error: err 
+        };
+    }
+};
+
+export const updateAdminBySuperAdmin = async (id: string, updateData: any) => {
+    try {
+        await ConnectDb();
+        
+        // Prevent updating super admin
+        const targetAdmin = await Admin.findById(id);
+        if (!targetAdmin) {
+            return { message: "Admin not found", success: false };
+        }
+        
+        if (targetAdmin.role === "super_admin") {
+            return { 
+                message: "Cannot update super admin", 
+                success: false 
+            };
+        }
+        
+        // Check for duplicate email/username if they're being updated
+        if (updateData.email || updateData.username) {
+            const duplicateCheck = await Admin.findOne({
+                _id: { $ne: id },
+                $or: [
+                    updateData.email ? { email: updateData.email } : {},
+                    updateData.username ? { username: updateData.username } : {}
+                ].filter(obj => Object.keys(obj).length > 0)
+            });
+
+            if (duplicateCheck) {
+                const field = duplicateCheck.email === updateData.email ? 'email' : 'username';
+                return { 
+                    message: `Admin with this ${field} already exists`, 
+                    success: false 
+                };
+            }
+        }
+        
+        // Don't allow role or password changes through this function
+        delete updateData.role;
+        delete updateData.password;
+
+        const admin = await Admin.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true }
+        ).select('-password -token');
+        
+        return { 
+            message: "Admin updated successfully", 
+            success: true, 
+            data: admin 
+        };
+    } catch (err) {
+        console.error("Error updating admin:", err);
+        return { 
+            message: "Internal Server Error", 
+            success: false, 
+            error: err 
+        };
+    }
+};
+
+export const deleteAdminBySuperAdmin = async (id: string) => {
+    try {
+        await ConnectDb();
+        
+        // Prevent deleting super admin
+        const targetAdmin = await Admin.findById(id);
+        if (!targetAdmin) {
+            return { message: "Admin not found", success: false };
+        }
+        
+        if (targetAdmin.role === "super_admin") {
+            return { 
+                message: "Cannot delete super admin", 
+                success: false 
+            };
+        }
+        
+        const admin = await Admin.findByIdAndUpdate(
+            id, 
+            { isActive: false }, 
+            { new: true }
+        ).select('-password -token');
+        
+        return { 
+            message: "Admin deleted successfully", 
+            success: true, 
+            data: admin 
+        };
+    } catch (err) {
+        console.error("Error deleting admin:", err);
+        return { 
+            message: "Internal Server Error", 
+            success: false, 
+            error: err 
+        };
+    }
+};
