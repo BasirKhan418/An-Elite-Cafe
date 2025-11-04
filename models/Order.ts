@@ -23,7 +23,7 @@ const OrderItemSchema = new mongoose.Schema({
 });
 
 const OrderSchema = new mongoose.Schema({
-    orderid: { type: String, required: true, unique: true, default: () => `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` },
+    orderid: { type: String, required: true, unique: true, default: () => `ord_${Math.random().toString(36).substr(2, 9)}` },
     tableid: { type: String, required: true, ref: 'Table' },
     tableNumber: { type: String, required: true },
     customerName: { type: String, required: false },
