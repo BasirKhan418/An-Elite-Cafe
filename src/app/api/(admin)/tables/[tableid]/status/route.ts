@@ -5,11 +5,11 @@ import { verifyAdminToken } from "../../../../../../../utils/verify";
 import { fetchTableById } from "../../../../../../../repository/tables/table";
 import { updateTableStatus } from "../../../../../../../repository/tables/tablecrud";
 
-export const dynamic = "force-dynamic"; // ensures no static inference confusion
+export const dynamic = "force-dynamic"; 
 
 export async function GET(
   request: NextRequest,
-  context: any // 👈 prevents incorrect Promise<{ params }> inference
+  context: any 
 ) {
   const { tableid } = context.params;
 

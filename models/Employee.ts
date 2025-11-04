@@ -10,5 +10,6 @@ const EmployeeSchema = new mongoose.Schema({
     resname:{ type: String, required: false  ,default:"An Elite Cafe" },
     joinDate:{ type: Date, required: false , default: new Date() },
     shift:{ type: String, required: false  ,default:"Morning Shift (9 AM - 5 PM)" },
+    isActive: { type: Boolean, required: false, default: true },
 }, { timestamps: true })
 export default mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);
