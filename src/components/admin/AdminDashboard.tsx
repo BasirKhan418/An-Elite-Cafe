@@ -8,7 +8,7 @@ import {
   CheckCircle2, 
   Users, 
   ClipboardList, 
-  DollarSign, 
+  IndianRupee, 
   Clock,
   ArrowRight,
   RefreshCw
@@ -246,10 +246,10 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm font-medium mb-1">Today's Revenue</p>
-              <p className="text-3xl font-bold text-green-600">${stats.todayRevenue.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-green-600">₹{stats.todayRevenue.toFixed(2)}</p>
             </div>
             <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-600" />
+              <IndianRupee className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </GlassCard>
@@ -288,7 +288,7 @@ const AdminDashboard: React.FC = () => {
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </span>
                 ),
-                'Amount': `$${order.totalAmount.toFixed(2)}`,
+                'Amount': `₹${order.totalAmount.toFixed(2)}`,
                 'Time': new Date(order.orderDate).toLocaleTimeString(),
                 _originalData: order
               }))}

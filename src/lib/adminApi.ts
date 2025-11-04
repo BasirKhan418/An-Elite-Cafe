@@ -108,4 +108,40 @@ export class AdminAPI {
     })
     return response.json()
   }
+
+  // Coupon API
+  static async getCoupons() {
+    const response = await fetch('/api/coupon', {
+      headers: this.getAuthHeaders()
+    })
+    return response.json()
+  }
+
+  static async validateCoupon(couponcode: string) {
+    const response = await fetch('/api/coupon/validate', {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ couponcode })
+    })
+    return response.json()
+  }
+
+  // Billing API
+  static async generateBill(orderid: string, coupon: string[], sgst: number, cgst: number) {
+    const response = await fetch('/api/orders/bill', {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ orderid, coupon, sgst, cgst })
+    })
+    return response.json()
+  }
+
+  static async markOrderAsDone(orderid: string, paymentmode: string) {
+    const response = await fetch('/api/orders/done', {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ orderid, paymentmode })
+    })
+    return response.json()
+  }
 }

@@ -5,7 +5,7 @@ import Table from "../../models/Table";
 export const createBill = async (orderId: string, data: any) => {
     try {
         await ConnectDb();
-        const { coupon = [], taxpercentage = 0 } = data;
+        const { coupon = [], sgst = 2.5, cgst = 2.5 } = data;
 
         const order = await Order.findOne({ orderid: orderId }).populate('items.menuid');
         if (!order) {
@@ -18,7 +18,7 @@ export const createBill = async (orderId: string, data: any) => {
         if (Array.isArray(coupon) && coupon.length > 0) {
             await Promise.all(
                 coupon.map(async (item: string) => {
-                    const couponData = await Coupon.findOne({ couponcode: item }); // correct key
+                    const couponData = await Coupon.findOne({ couponcode: item });
                     if (couponData) {
                         if (couponData.totalUsageLimit > 0) {
                             await Coupon.updateOne(
@@ -35,8 +35,9 @@ export const createBill = async (orderId: string, data: any) => {
         const discountAmount = (totalAmount * discountPercentage) / 100;
         totalAmount -= discountAmount;
 
-
-        const taxAmount = (taxpercentage / 100) * totalAmount;
+        const sgstAmount = (sgst / 100) * totalAmount;
+        const cgstAmount = (cgst / 100) * totalAmount;
+        const taxAmount = sgstAmount + cgstAmount;
         totalAmount += taxAmount;
 
         totalAmount = Math.ceil(totalAmount < 0 ? 0 : totalAmount);
@@ -45,7 +46,9 @@ export const createBill = async (orderId: string, data: any) => {
             { orderid: orderId },
             {
                 totalAmount,
-                tax: taxpercentage,
+                sgst,
+                cgst,
+                tax: sgst + cgst, 
                 discount: discountPercentage,
             }
         );
@@ -53,7 +56,11 @@ export const createBill = async (orderId: string, data: any) => {
         return {
             success: true,
             totalAmount,
-            totalTax: taxpercentage,
+            sgst,
+            cgst,
+            totalTax: sgst + cgst,
+            sgstAmount,
+            cgstAmount,
             totalDiscount: discountPercentage,
             order,
             message: "Bill created successfully",

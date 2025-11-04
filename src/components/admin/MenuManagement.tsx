@@ -360,7 +360,7 @@ const MenuManagement: React.FC = () => {
     'Menu ID': menu.menuid,
     'Name': menu.name,
     'Category': getCategoryName(menu.category),
-    'Price': `$${menu.price.toFixed(2)}`,
+    'Price': `₹${menu.price.toFixed(2)}`,
     'Status': (
       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
         menu.status === 'available' 

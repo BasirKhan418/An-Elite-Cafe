@@ -30,7 +30,8 @@ const OrderSchema = new mongoose.Schema({
     customerPhone: { type: String, required: false },
     items: [OrderItemSchema],
     subtotal: { type: Number, required: true, min: 0 },
-    tax: { type: Number, required: false, default: 0 },
+    sgst: { type: Number, required: true, default: 2.5, min: 0, max: 20 },
+    cgst: { type: Number, required: true, default: 2.5, min: 0, max: 20 },
     discount: { type: Number, required: false, default: 0 },
     totalAmount: { type: Number, required: true, min: 0 },
     status: { 

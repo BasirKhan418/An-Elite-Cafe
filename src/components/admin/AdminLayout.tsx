@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { GlassCard, GlassButton } from '@/components/ui/glass'
 import { cn } from '@/lib/utils'
 import { useAdminAuth } from './AdminAuthProvider'
@@ -39,7 +39,7 @@ interface NavItem {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [expandedMenu, setExpandedMenu] = useState<string | null>('inventory')
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
   const { adminData, logout } = useAdminAuth()
 
   const navigationItems: NavItem[] = [
@@ -58,10 +58,32 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
       ]
     },
     { id: 'employees', label: 'Employee Management', icon: Users, href: '/admin/employees' },
-    { id: 'orders', label: 'Order Status', icon: ClipboardList, href: '/admin/orders' },
+    { 
+      id: 'orders', 
+      label: 'Order Status', 
+      icon: ClipboardList, 
+      submenu: [
+        { id: 'orders-active', label: 'Active Orders', href: '/admin/orders/active' },
+        { id: 'orders-history', label: 'Order History', href: '/admin/orders/history' }
+      ]
+    },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, href: '/admin/analytics' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/admin/settings' },
   ]
+
+  // Auto-expand menu if current page belongs to a submenu
+  useEffect(() => {
+    const activeMenuItem = navigationItems.find(item => {
+      if (item.submenu) {
+        return item.submenu.some(sub => sub.id === currentPage)
+      }
+      return false
+    })
+    
+    if (activeMenuItem) {
+      setExpandedMenu(activeMenuItem.id)
+    }
+  }, [currentPage])
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -74,6 +96,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
       return item.submenu.some(sub => currentPage === sub.id)
     }
     return currentPage === item.id
+  }
+
+  const toggleMenu = (itemId: string) => {
+    setExpandedMenu(prev => prev === itemId ? null : itemId)
   }
 
   return (
@@ -138,13 +164,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
                       {hasSubmenu ? (
                         <>
                           <button
-                            onClick={() => setExpandedMenu(isExpanded ? null : item.id)}
+                            onClick={() => toggleMenu(item.id)}
                             className={cn(
                               "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden",
                               sidebarOpen ? "justify-between" : "justify-center",
                               isActive
                                 ? "bg-gray-900 text-white shadow-md"
-                                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                             )}
                           >
                             <div className="flex items-center gap-3">
@@ -202,7 +228,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
                             sidebarOpen ? "justify-start" : "justify-center",
                             isActive
                               ? "bg-gray-900 text-white shadow-md"
-                              : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                           )}
                         >
                           <IconComponent className={cn(

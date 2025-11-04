@@ -76,6 +76,12 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         const body = await request.json();
+        
+        if (body.orderid && (body.status || body.paymentStatus) && !body.items) {
+            const res = await updateOrder(body.orderid, body);
+            return NextResponse.json(res, { status: res.success ? 200 : 500 });
+        }
+        
         const parseResult = OrderSchema.safeParse(body);
         if (!parseResult.success) {
             return NextResponse.json({ error: parseResult.error, success: false, message: "Invalid order data" }, { status: 400 });

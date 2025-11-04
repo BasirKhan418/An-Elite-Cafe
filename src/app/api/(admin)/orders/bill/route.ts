@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         const body = await request.json();
-        const { orderid, coupon, taxpercentage } = body;
-        const res = await createBill(orderid, { coupon, taxpercentage });
+        const { orderid, coupon, sgst, cgst } = body;
+        const res = await createBill(orderid, { coupon, sgst, cgst });
         return NextResponse.json(res, { status: res.success ? 200 : 500 });
     }
     catch (error) {
