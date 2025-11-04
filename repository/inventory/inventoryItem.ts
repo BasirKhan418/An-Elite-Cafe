@@ -33,7 +33,6 @@ export const createInventoryItem = async (itemData: InventoryItemData) => {
     
     console.log('Creating inventory item with data:', JSON.stringify(itemData, null, 2));
     
-    // Check if item with same name or itemid already exists
     const existingItem = await InventoryItem.findOne({
       $or: [{ name: itemData.name }, { itemid: itemData.itemid }]
     });
@@ -89,7 +88,6 @@ export const deleteInventoryItem = async (itemid: string) => {
   try {
     await ConnectDb();
     
-    // Soft delete by setting isActive to false
     const deletedItem = await InventoryItem.findOneAndUpdate(
       { itemid },
       { isActive: false },

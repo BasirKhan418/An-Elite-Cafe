@@ -43,26 +43,22 @@ export async function GET(request: NextRequest) {
     const checkAvailability = url.searchParams.get("checkAvailability");
     const quantity = url.searchParams.get("quantity");
     
-    // Check recipe availability
     if (checkAvailability === "true" && recipeid) {
       const qty = quantity ? parseInt(quantity) : 1;
       const result = await checkRecipeAvailability(recipeid, qty);
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Get specific recipe by ID
     if (recipeid) {
       const result = await getRecipeById(recipeid);
       return NextResponse.json(result, { status: result.success ? 200 : 404 });
     }
     
-    // Get recipes for specific menu item
     if (menuItemId) {
       const result = await getRecipesByMenuItem(menuItemId);
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Search recipes with filters
     const searchParams = {
       type: url.searchParams.get("type") || undefined,
       status: url.searchParams.get("status") || undefined,
@@ -73,7 +69,6 @@ export async function GET(request: NextRequest) {
       createdBy: url.searchParams.get("createdBy") || undefined
     };
     
-    // Remove undefined values
     const filteredSearchParams = Object.fromEntries(
       Object.entries(searchParams).filter(([_, value]) => value !== undefined)
     );
@@ -93,7 +88,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Get all recipes
     const recipes = await getAllRecipes();
     return NextResponse.json(recipes, { status: recipes.success ? 200 : 500 });
     
@@ -132,7 +126,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const action = body.action;
     
-    // Handle recipe usage
     if (action === "use") {
       const validation = RecipeUsageSchema.safeParse(body);
       if (!validation.success) {
@@ -150,7 +143,6 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Create new recipe
     const validation = RecipeSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({
@@ -208,7 +200,6 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // Validate request body
     const validation = RecipeUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({

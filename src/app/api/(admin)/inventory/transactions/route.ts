@@ -40,7 +40,6 @@ export async function GET(request: NextRequest) {
     const itemid = url.searchParams.get("itemid");
     const stats = url.searchParams.get("stats");
     
-    // Get transaction statistics
     if (stats === "true") {
       const dateFrom = url.searchParams.get("dateFrom") || undefined;
       const dateTo = url.searchParams.get("dateTo") || undefined;
@@ -48,19 +47,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Get specific transaction by ID
     if (transactionid) {
       const result = await getStockTransactionById(transactionid);
       return NextResponse.json(result, { status: result.success ? 200 : 404 });
     }
     
-    // Get transactions for specific item
     if (itemid) {
       const result = await getTransactionsByItem(itemid);
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Search transactions with filters
     const searchParams = {
       itemid: url.searchParams.get("itemid") || undefined,
       type: url.searchParams.get("type") || undefined,
@@ -71,7 +67,6 @@ export async function GET(request: NextRequest) {
       dateTo: url.searchParams.get("dateTo") || undefined
     };
     
-    // Remove undefined values
     const filteredSearchParams = Object.fromEntries(
       Object.entries(searchParams).filter(([_, value]) => value !== undefined)
     );
@@ -91,7 +86,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Get all transactions
     const transactions = await getAllStockTransactions();
     return NextResponse.json(transactions, { status: transactions.success ? 200 : 500 });
     
@@ -129,7 +123,6 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
     
-    // Validate request body
     const validation = StockTransactionSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({
@@ -187,7 +180,6 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // Validate request body
     const validation = StockTransactionUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({

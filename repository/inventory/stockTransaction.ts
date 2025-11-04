@@ -36,24 +36,20 @@ export const createStockTransaction = async (transactionData: StockTransactionDa
   try {
     await ConnectDb();
     
-    // Verify item exists
     const item = await InventoryItem.findById(transactionData.item);
     if (!item) {
       return { success: false, message: "Invalid item" };
     }
     
-    // Check if transaction ID already exists
     const existingTransaction = await StockTransaction.findOne({ transactionid: transactionData.transactionid });
     if (existingTransaction) {
       return { success: false, message: "Transaction with this ID already exists" };
     }
     
-    // Calculate stock changes
     const previousStock = item.currentStock;
     let newStock: number;
     
-    // For purchase, adjustment (positive), return - add to stock
-    // For usage, waste, adjustment (negative), transfer out - subtract from stock
+ 
     if (transactionData.type === 'purchase' || transactionData.type === 'return' || 
         (transactionData.type === 'adjustment' && transactionData.quantity > 0)) {
       newStock = previousStock + Math.abs(transactionData.quantity);
@@ -65,7 +61,6 @@ export const createStockTransaction = async (transactionData: StockTransactionDa
       }
     }
     
-    // Create transaction with calculated values
     const transactionWithCalculatedValues = {
       ...transactionData,
       previousStock,
@@ -78,7 +73,6 @@ export const createStockTransaction = async (transactionData: StockTransactionDa
     const newTransaction = new StockTransaction(transactionWithCalculatedValues);
     await newTransaction.save();
     
-    // Update item stock and recalculate average cost if it's a purchase
     if (transactionData.type === 'purchase') {
       const totalCost = (item.currentStock * item.averageCostPerUnit) + 
                        (Math.abs(transactionData.quantity) * transactionData.unitCost);
@@ -97,7 +91,6 @@ export const createStockTransaction = async (transactionData: StockTransactionDa
       });
     }
     
-    // Populate item details before returning
     await newTransaction.populate('item', 'name unit currentStock');
     
     return { success: true, transaction: newTransaction, message: "Transaction created successfully" };
@@ -110,7 +103,6 @@ export const updateStockTransaction = async (transactionid: string, updateData: 
   try {
     await ConnectDb();
     
-    // For simplicity, only allow updating status and notes
     const allowedUpdates = ['status', 'notes'];
     const filteredUpdateData = Object.keys(updateData)
       .filter(key => allowedUpdates.includes(key))
@@ -142,7 +134,6 @@ export const searchStockTransactions = async (searchData: StockTransactionSearch
     const query: any = {};
     
     if (searchData.itemid) {
-      // Convert string to MongoDB ObjectId for proper comparison
       try {
         query.item = new mongoose.Types.ObjectId(searchData.itemid);
       } catch (e) {
@@ -179,7 +170,7 @@ export const searchStockTransactions = async (searchData: StockTransactionSearch
     const transactions = await StockTransaction.find(query)
       .populate('item', 'name unit')
       .sort({ createdAt: -1 })
-      .limit(500); // Limit for performance
+      .limit(500);
     
     return { success: true, transactions, message: "Transactions searched successfully" };
   } catch (error) {
@@ -191,7 +182,6 @@ export const getTransactionsByItem = async (itemid: string) => {
   try {
     await ConnectDb();
     
-    // Convert string to MongoDB ObjectId for proper comparison
     let objectId;
     try {
       objectId = new mongoose.Types.ObjectId(itemid);

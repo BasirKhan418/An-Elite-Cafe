@@ -39,19 +39,16 @@ export async function GET(request: NextRequest) {
     const search = url.searchParams.get("search");
     const type = url.searchParams.get("type");
     
-    // Get specific category by ID
     if (categoryid) {
       const result = await getInventoryCategoryById(categoryid);
       return NextResponse.json(result, { status: result.success ? 200 : 404 });
     }
     
-    // Search categories
     if (search || type) {
       const result = await searchInventoryCategories(search || "", type || undefined);
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Get all categories
     const categories = await getAllInventoryCategories();
     return NextResponse.json(categories, { status: categories.success ? 200 : 500 });
     
@@ -89,7 +86,6 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
     
-    // Validate request body
     const validation = InventoryCategorySchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({
@@ -147,7 +143,6 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // Validate request body
     const validation = InventoryCategoryUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({

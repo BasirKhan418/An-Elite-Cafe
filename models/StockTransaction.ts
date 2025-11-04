@@ -28,9 +28,9 @@ const StockTransactionSchema = new mongoose.Schema(
       required: true,
       enum: Object.values(StockTransactionType),
     },
-    quantity: { type: Number, required: true }, // positive for inflow, negative for outflow
-    unitCost: { type: Number, required: true, default: 0, min: 0 }, // cost per unit in INR
-    totalCost: { type: Number, required: true, default: 0, min: 0 }, // quantity * unitcost
+    quantity: { type: Number, required: true }, 
+    unitCost: { type: Number, required: true, default: 0, min: 0 }, 
+    totalCost: { type: Number, required: true, default: 0, min: 0 },
     status: {
       type: String,
       required: true,
@@ -39,16 +39,16 @@ const StockTransactionSchema = new mongoose.Schema(
     },
     previousStock: { type: Number, required: true, min: 0 },
     newStock: { type: Number, required: true, min: 0 },
-    reference: { type: String, required: false }, // reference to recipe, order, or purchase order
+    reference: { type: String, required: false },
     notes: { type: String, required: false },
-    expiryDate: { type: Date, required: false }, // for perishable items
+    expiryDate: { type: Date, required: false },
     batchNumber: { type: String, required: false },
-    performedBy: { type: String, required: true }, // admin or employee ID
+    performedBy: { type: String, required: true }, 
     relatedTransaction: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "StockTransaction",
       required: false,
-    }, // For linked transactions like returns
+    },
   },
   { timestamps: true }
 );
@@ -59,7 +59,6 @@ StockTransactionSchema.index({ transactionid: 1 });
 StockTransactionSchema.index({ reference: 1 });
 StockTransactionSchema.index({ performedBy: 1 });
 
-// Pre-save middleware to calculate total cost
 StockTransactionSchema.pre('save', function(next) {
   this.totalCost = Math.abs(this.quantity) * this.unitCost;
   next();

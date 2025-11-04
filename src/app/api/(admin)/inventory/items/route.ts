@@ -41,25 +41,21 @@ export async function GET(request: NextRequest) {
     const lowStock = url.searchParams.get("lowStock");
     const stats = url.searchParams.get("stats");
     
-    // Get inventory statistics
     if (stats === "true") {
       const result = await getInventoryValue();
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Get specific item by ID
     if (itemid) {
       const result = await getInventoryItemById(itemid);
       return NextResponse.json(result, { status: result.success ? 200 : 404 });
     }
     
-    // Get low stock items
     if (lowStock === "true") {
       const result = await getLowStockItems();
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Search items with filters
     const searchParams = {
       category: url.searchParams.get("category") || undefined,
       status: url.searchParams.get("status") || undefined,
@@ -70,7 +66,6 @@ export async function GET(request: NextRequest) {
       tags: url.searchParams.get("tags")?.split(",") || undefined
     };
     
-    // Remove undefined values
     const filteredSearchParams = Object.fromEntries(
       Object.entries(searchParams).filter(([_, value]) => value !== undefined)
     );
@@ -90,7 +85,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(result, { status: result.success ? 200 : 500 });
     }
     
-    // Get all items
     const items = await getAllInventoryItems();
     return NextResponse.json(items, { status: items.success ? 200 : 500 });
     
@@ -129,7 +123,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Received body:', JSON.stringify(body, null, 2));
     
-    // Validate request body
     const validation = InventoryItemSchema.safeParse(body);
     if (!validation.success) {
       console.log('Validation failed:', JSON.stringify(validation.error.issues, null, 2));
@@ -190,7 +183,6 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // Validate request body
     const validation = InventoryItemUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({

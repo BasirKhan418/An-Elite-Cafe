@@ -37,7 +37,6 @@ export const createRecipe = async (recipeData: RecipeData) => {
   try {
     await ConnectDb();
     
-    // Check if recipe with same name or recipeid already exists
     const existingRecipe = await Recipe.findOne({
       $or: [{ name: recipeData.name }, { recipeid: recipeData.recipeid }]
     });
@@ -46,7 +45,6 @@ export const createRecipe = async (recipeData: RecipeData) => {
       return { success: false, message: "Recipe with this name or ID already exists" };
     }
     
-    // Verify all ingredients exist
     for (const ingredient of recipeData.ingredients) {
       const item = await InventoryItem.findById(ingredient.item);
       if (!item) {
@@ -54,19 +52,13 @@ export const createRecipe = async (recipeData: RecipeData) => {
       }
     }
     
-    // Verify menu item exists if provided
     if (recipeData.menuItem) {
-      // Note: You might want to import Menu model and verify it exists
-      // const menuItem = await Menu.findById(recipeData.menuItem);
-      // if (!menuItem) {
-      //   return { success: false, message: "Invalid menu item" };
-      // }
+      
     }
     
     const newRecipe = new Recipe(recipeData);
     await newRecipe.save();
     
-    // Populate before returning
     await newRecipe.populate('ingredients.item', 'name unit averageCostPerUnit');
     await newRecipe.populate('menuItem', 'name price');
     
@@ -80,7 +72,6 @@ export const updateRecipe = async (recipeid: string, updateData: RecipeUpdateDat
   try {
     await ConnectDb();
     
-    // Check if updating name and it conflicts with another recipe
     if (updateData.name) {
       const existingRecipe = await Recipe.findOne({
         name: updateData.name,
@@ -92,7 +83,6 @@ export const updateRecipe = async (recipeid: string, updateData: RecipeUpdateDat
       }
     }
     
-    // Verify ingredients if being updated
     if (updateData.ingredients) {
       for (const ingredient of updateData.ingredients) {
         const item = await InventoryItem.findById(ingredient.item);
@@ -123,7 +113,6 @@ export const deleteRecipe = async (recipeid: string) => {
   try {
     await ConnectDb();
     
-    // Soft delete by setting isActive to false
     const deletedRecipe = await Recipe.findOneAndUpdate(
       { recipeid },
       { isActive: false },
@@ -163,7 +152,6 @@ export const searchRecipes = async (searchData: RecipeSearchData) => {
     }
     
     if (searchData.menuItem) {
-      // Convert string to MongoDB ObjectId for proper comparison
       try {
         query.menuItem = new mongoose.Types.ObjectId(searchData.menuItem);
       } catch (e) {
@@ -205,7 +193,6 @@ export const useRecipe = async (usageData: RecipeUsageData) => {
       return { success: false, message: "Recipe not found" };
     }
     
-    // Check if we have enough stock for all ingredients
     const insufficientIngredients = [];
     for (const ingredient of recipe.ingredients) {
       const requiredQuantity = ingredient.quantity * usageData.quantity;
@@ -229,7 +216,6 @@ export const useRecipe = async (usageData: RecipeUsageData) => {
       };
     }
     
-    // Create stock transactions for each ingredient
     const transactions = [];
     for (const ingredient of recipe.ingredients) {
       const requiredQuantity = ingredient.quantity * usageData.quantity;
@@ -239,7 +225,7 @@ export const useRecipe = async (usageData: RecipeUsageData) => {
         transactionid: `usage_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         item: item._id,
         type: 'usage' as const,
-        quantity: -requiredQuantity, // Negative for usage
+        quantity: -requiredQuantity, 
         unitCost: item.averageCostPerUnit,
         previousStock: item.currentStock,
         newStock: item.currentStock - requiredQuantity,
@@ -252,14 +238,12 @@ export const useRecipe = async (usageData: RecipeUsageData) => {
       await transaction.save();
       transactions.push(transaction);
       
-      // Update item stock
       await InventoryItem.findByIdAndUpdate(item._id, {
         currentStock: item.currentStock - requiredQuantity,
         totalValue: (item.currentStock - requiredQuantity) * item.averageCostPerUnit
       });
     }
     
-    // Update recipe usage stats
     await Recipe.findOneAndUpdate(
       { recipeid: usageData.recipeid },
       { 

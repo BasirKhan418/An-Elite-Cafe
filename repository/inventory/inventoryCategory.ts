@@ -29,7 +29,6 @@ export const createInventoryCategory = async (categoryData: InventoryCategoryDat
   try {
     await ConnectDb();
     
-    // Check if category with same name or categoryid already exists
     const existingCategory = await InventoryCategory.findOne({
       $or: [{ name: categoryData.name }, { categoryid: categoryData.categoryid }]
     });
@@ -51,7 +50,6 @@ export const updateInventoryCategory = async (categoryid: string, updateData: In
   try {
     await ConnectDb();
     
-    // Check if updating name and it conflicts with another category
     if (updateData.name) {
       const existingCategory = await InventoryCategory.findOne({
         name: updateData.name,
@@ -83,7 +81,6 @@ export const deleteInventoryCategory = async (categoryid: string) => {
   try {
     await ConnectDb();
     
-    // Soft delete by setting isActive to false
     const deletedCategory = await InventoryCategory.findOneAndUpdate(
       { categoryid },
       { isActive: false },
