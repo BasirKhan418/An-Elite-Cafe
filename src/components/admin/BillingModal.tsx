@@ -20,7 +20,7 @@ import {
   Receipt,
   Printer
 } from 'lucide-react'
-
+import { toast } from 'sonner'
 interface BillingModalProps {
   order: Order | null
   isOpen: boolean
@@ -89,16 +89,16 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
           setAppliedCoupons([...appliedCoupons, couponCode.trim()])
           setCouponCode('')
           // Show success message
-          alert(`✓ Coupon "${couponCode.trim()}" applied successfully! You get ${response.coupon?.discountPercentage}% off.`)
+          toast.success(`✓ Coupon "${couponCode.trim()}" applied successfully! You get ${response.coupon?.discountPercentage}% off.`)
         } else {
-          alert('⚠ This coupon is already applied')
+          toast.warning('⚠ This coupon is already applied')
         }
       } else {
-        alert(`✗ ${response.message || 'Invalid coupon code'}`)
+        toast.error(`✗ ${response.message || 'Invalid coupon code'}`)
       }
     } catch (error) {
       console.error('Error validating coupon:', error)
-      alert('✗ Failed to validate coupon. Please try again.')
+      toast.error('✗ Failed to validate coupon. Please try again.')
     } finally {
       setValidatingCoupon(false)
     }
@@ -150,7 +150,7 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
     
     // Check if bill is already generated
     if (order.isgeneratedBill || billGenerated) {
-      alert('⚠ Bill has already been generated for this order. You cannot regenerate it.')
+      toast.warning('⚠ Bill has already been generated for this order. You cannot regenerate it.')
       return
     }
 
@@ -164,14 +164,14 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
         if (order) {
           order.isgeneratedBill = true
         }
-        alert('✓ Bill generated successfully!')
+        toast.success('✓ Bill generated successfully!')
         onBillGenerated()
       } else {
-        alert(`✗ ${response.message || 'Failed to generate bill'}`)
+        toast.error(`✗ ${response.message || 'Failed to generate bill'}`)
       }
     } catch (error) {
       console.error('Error generating bill:', error)
-      alert('✗ Failed to generate bill. Please try again.')
+      toast.error('✗ Failed to generate bill. Please try again.')
     } finally {
       setProcessing(false)
     }
@@ -184,15 +184,15 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
     try {
       const response = await AdminAPI.markOrderAsDone(order.orderid, paymentMode)
       if (response.success) {
-        alert('Order completed successfully!')
+        toast.success('Order completed successfully!')
         onBillGenerated()
         onClose()
       } else {
-        alert(response.message || 'Failed to complete order')
+        toast.error(response.message || 'Failed to complete order')
       }
     } catch (error) {
       console.error('Error completing order:', error)
-      alert('Failed to complete order')
+      toast.error('Failed to complete order')
     } finally {
       setProcessing(false)
     }
@@ -203,7 +203,7 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
 
     const printWindow = window.open('', '_blank', 'width=400,height=800')
     if (!printWindow) {
-      alert('Please allow popups to print the bill')
+      toast.warning('Please allow popups to print the bill')
       return
     }
 

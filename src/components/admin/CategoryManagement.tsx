@@ -10,7 +10,7 @@ import {
   RefreshCw,
   AlertTriangle
 } from 'lucide-react'
-
+import { toast } from 'sonner'
 interface Category {
   _id: string
   categoryid: string
@@ -132,11 +132,11 @@ const CategoryManagement: React.FC = () => {
         setCategoryToDelete(null)
       } else {
         console.error('Error deleting category:', data.message)
-        alert(data.message || 'Error deleting category')
+        toast.error(data.message || 'Error deleting category')
       }
     } catch (error) {
       console.error('Error deleting category:', error)
-      alert('Error deleting category. Please try again.')
+      toast.error('Error deleting category. Please try again.')
     }
   }
 
@@ -209,11 +209,11 @@ const CategoryManagement: React.FC = () => {
         setFormData({ categoryid: '', name: '', icon: '' })
       } else {
         console.error('Error saving category:', data.message)
-        alert(data.message || 'Error saving category')
+        toast.error(data.message || 'Error saving category')
       }
     } catch (error) {
       console.error('Error saving category:', error)
-      alert('Error saving category. Please try again.')
+      toast.error('Error saving category. Please try again.')
     }
   }
 

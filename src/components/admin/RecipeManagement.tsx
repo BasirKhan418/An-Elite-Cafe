@@ -14,7 +14,7 @@ import {
   DollarSign,
   Package
 } from 'lucide-react'
-
+import {toast} from 'sonner'
 interface InventoryItem {
   _id: string
   name: string
@@ -263,9 +263,9 @@ const RecipeManagement: React.FC = () => {
         setUseReference('')
         setUseNotes('')
         fetchRecipes()
-        alert('Recipe used successfully! Stock has been updated.')
+        toast.success('Recipe used successfully! Stock has been updated.')
       } else {
-        alert(result.message || 'Failed to use recipe')
+        toast.error(result.message || 'Failed to use recipe')
       }
     } catch (error) {
       console.error('Error using recipe:', error)

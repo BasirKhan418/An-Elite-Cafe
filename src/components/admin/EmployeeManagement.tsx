@@ -13,7 +13,7 @@ import {
   RefreshCw,
   Calendar
 } from 'lucide-react'
-
+import { toast } from 'sonner'
 interface Employee {
   _id: string
   name: string
@@ -146,14 +146,14 @@ const EmployeeManagement: React.FC = () => {
 
         if (data.success) {
           setEmployees(employees.filter(e => e._id !== employee._id))
-          alert('Employee removed successfully!')
+          toast.success('Employee removed successfully!')
         } else {
           console.error('Error deleting employee:', data.message)
-          alert(data.message || 'Error deleting employee')
+          toast.error(data.message || 'Error deleting employee')
         }
       } catch (error) {
         console.error('Error deleting employee:', error)
-        alert('Error deleting employee. Please try again.')
+        toast.error('Error deleting employee. Please try again.')
       }
     }
   }
@@ -181,14 +181,14 @@ const EmployeeManagement: React.FC = () => {
               ? { ...e, isActive: !e.isActive }
               : e
           ))
-          alert(`Employee ${action}d successfully!`)
+          toast.success(`Employee ${action}d successfully!`)
         } else {
           console.error('Error toggling status:', data.message)
-          alert(data.message || 'Error toggling status')
+          toast.error(data.message || 'Error toggling status')
         }
       } catch (error) {
         console.error('Error toggling status:', error)
-        alert('Error toggling status. Please try again.')
+        toast.error('Error toggling status. Please try again.')
       }
     }
   }
@@ -252,7 +252,7 @@ const EmployeeManagement: React.FC = () => {
               ? { ...e, ...formData, _id: e._id, empid: e.empid, joinDate: e.joinDate }
               : e
           ))
-          alert('Employee updated successfully!')
+          toast.success('Employee updated successfully!')
         } else {
           // Add new employee
           const newEmployee: Employee = {
@@ -263,16 +263,16 @@ const EmployeeManagement: React.FC = () => {
             isActive: data.data.isActive !== undefined ? data.data.isActive : true
           }
           setEmployees([newEmployee, ...employees])
-          alert('Employee added successfully!')
+          toast.success('Employee added successfully!')
         }
         setShowModal(false)
       } else {
         console.error('Error saving employee:', data.message)
-        alert(data.message || 'Error saving employee. Please check the form and try again.')
+        toast.error(data.message || 'Error saving employee. Please check the form and try again.')
       }
     } catch (error) {
       console.error('Error saving employee:', error)
-      alert('Error saving employee. Please try again.')
+      toast.error('Error saving employee. Please try again.')
     }
   }
 

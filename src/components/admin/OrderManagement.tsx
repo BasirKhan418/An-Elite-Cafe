@@ -17,7 +17,7 @@ import {
   XCircle,
   Receipt
 } from 'lucide-react'
-
+import { toast } from 'sonner'
 interface MenuItem {
   _id: string
   menuid: {
@@ -94,11 +94,11 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ onViewDetails, onGene
           o.orderid === orderid ? { ...o, status: newStatus as any } : o
         ))
       } else {
-        alert(response.message || 'Failed to update order status')
+        toast.error(response.message || 'Failed to update order status')
       }
     } catch (error) {
       console.error('Error updating order:', error)
-      alert('Failed to update order status')
+      toast.error('Failed to update order status')
     }
   }
 

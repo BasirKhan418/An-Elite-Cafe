@@ -12,7 +12,7 @@ import {
   Clock,
   RefreshCw
 } from 'lucide-react'
-
+import { toast } from 'sonner'
 interface Table {
   _id: string
   tableid: string
@@ -118,11 +118,11 @@ const TableManagement: React.FC = () => {
           setTables(tables.filter(t => t._id !== table._id))
         } else {
           console.error('Error deleting table:', data.message)
-          alert(data.message || 'Error deleting table')
+          toast.error(data.message || 'Error deleting table')
         }
       } catch (error) {
         console.error('Error deleting table:', error)
-        alert('Error deleting table. Please try again.')
+        toast.error('Error deleting table. Please try again.')
       }
     }
   }
@@ -187,11 +187,11 @@ const TableManagement: React.FC = () => {
         setShowModal(false)
       } else {
         console.error('Error saving table:', data.message)
-        alert(data.message || 'Error saving table')
+        toast.error(data.message || 'Error saving table')
       }
     } catch (error) {
       console.error('Error saving table:', error)
-      alert('Error saving table. Please try again.')
+      toast.error('Error saving table. Please try again.')
     }
   }
 
