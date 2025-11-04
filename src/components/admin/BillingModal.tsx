@@ -46,10 +46,11 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
       fetchCoupons()
       setAppliedCoupons([])
       setCouponCode('')
-      setSgst(2.5)
-      setCgst(2.5)
+      setSgst(order.sgst || 2.5)
+      setCgst(order.cgst || 2.5)
       setPaymentMode('cash')
-      setBillGenerated(false)
+      // Check if bill is already generated
+      setBillGenerated(order.isgeneratedBill || false)
       setBillDetails(null)
     }
   }, [isOpen, order])
@@ -75,15 +76,17 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
         if (!appliedCoupons.includes(couponCode.trim())) {
           setAppliedCoupons([...appliedCoupons, couponCode.trim()])
           setCouponCode('')
+          // Show success message
+          alert(`✓ Coupon "${couponCode.trim()}" applied successfully! You get ${response.coupon?.discountPercentage}% off.`)
         } else {
-          alert('Coupon already applied')
+          alert('⚠ This coupon is already applied')
         }
       } else {
-        alert(response.message || 'Invalid coupon code')
+        alert(`✗ ${response.message || 'Invalid coupon code'}`)
       }
     } catch (error) {
       console.error('Error validating coupon:', error)
-      alert('Failed to validate coupon')
+      alert('✗ Failed to validate coupon. Please try again.')
     } finally {
       setValidatingCoupon(false)
     }
@@ -107,11 +110,16 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
       }
     })
 
+    // Calculate discount on subtotal
     const discountAmount = (subtotal * discountPercentage) / 100
     const afterDiscount = subtotal - discountAmount
+    
+    // Calculate tax on discounted amount
     const sgstAmount = (afterDiscount * sgst) / 100
     const cgstAmount = (afterDiscount * cgst) / 100
     const taxAmount = sgstAmount + cgstAmount
+    
+    // Calculate final total
     const total = Math.ceil(afterDiscount + taxAmount)
 
     return {
@@ -127,6 +135,12 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
 
   const handleGenerateBill = async () => {
     if (!order) return
+    
+    // Check if bill is already generated
+    if (order.isgeneratedBill || billGenerated) {
+      alert('⚠ Bill has already been generated for this order. You cannot regenerate it.')
+      return
+    }
 
     setProcessing(true)
     try {
@@ -134,12 +148,13 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
       if (response.success) {
         setBillGenerated(true)
         setBillDetails(response)
+        alert('✓ Bill generated successfully!')
       } else {
-        alert(response.message || 'Failed to generate bill')
+        alert(`✗ ${response.message || 'Failed to generate bill'}`)
       }
     } catch (error) {
       console.error('Error generating bill:', error)
-      alert('Failed to generate bill')
+      alert('✗ Failed to generate bill. Please try again.')
     } finally {
       setProcessing(false)
     }
@@ -259,6 +274,19 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Warning if bill already generated */}
+          {order.isgeneratedBill && !billGenerated && (
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-yellow-800">Bill Already Generated</p>
+                <p className="text-sm text-yellow-700 mt-1">
+                  The bill for this order has already been generated. You can only complete the order now.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Order Items Summary */}
           <div>
             <h3 className="font-semibold text-gray-800 mb-3">Order Items</h3>
@@ -288,7 +316,7 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
             </div>
           </div>
 
-          {!billGenerated && (
+          {!billGenerated && !order.isgeneratedBill && (
             <>
               {/* Coupon Section */}
               <div>
@@ -492,10 +520,10 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
               <GlassButton 
                 variant="primary" 
                 onClick={handleGenerateBill}
-                disabled={processing}
+                disabled={processing || (order?.isgeneratedBill || false)}
                 className="flex-1"
               >
-                {processing ? 'Generating...' : 'Generate Bill'}
+                {processing ? 'Generating...' : (order?.isgeneratedBill ? 'Bill Already Generated' : 'Generate Bill')}
               </GlassButton>
             ) : (
               <>

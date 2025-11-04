@@ -1,8 +1,22 @@
 "use client"
 
-import React from 'react'
-import { X, User, Phone, Calendar, Clock, Utensils, Hash } from 'lucide-react'
-import type { Order } from '@/types/order'
+import React, { useRef } from 'react'
+import { GlassCard, GlassButton } from '@/components/ui/glass'
+import type { Order, PopulatedMenuItem } from '@/types/order'
+import { 
+  X, 
+  Clock,
+  User,
+  Phone,
+  MapPin,
+  Package,
+  IndianRupee,
+  Tag,
+  Calendar,
+  ChefHat,
+  Receipt,
+  CreditCard
+} from 'lucide-react'
 
 interface OrderDetailsModalProps {
   order: Order | null
@@ -10,223 +24,308 @@ interface OrderDetailsModalProps {
   onClose: () => void
 }
 
+import KitchenTicket from './KitchenTicket'
+
 const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, onClose }) => {
+  const kotRef = useRef<HTMLDivElement>(null)
   if (!isOpen || !order) return null
 
+  const handlePrintKOT = () => {
+    if (!kotRef.current || !order) return
+    const printWindow = window.open('', '_blank', 'width=360,height=800')
+    if (!printWindow) return
+    const html = kotRef.current.innerHTML
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>KOT - ${order.orderid}</title>
+          <style>
+            @page { margin: 6mm; }
+            body { background: #fff; margin: 0; }
+            /* Ensure true size in print */
+            .kot-print { width: 280px; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>
+          ${html}
+          <script>
+            window.onload = function(){ setTimeout(function(){ window.print(); }, 200); };
+          <\/script>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+  }
+
   const getStatusColor = (status: string) => {
-    const colors: { [key: string]: string } = {
-      pending: 'bg-amber-500',
-      preparing: 'bg-blue-500',
-      ready: 'bg-green-500',
-      served: 'bg-purple-500',
-      done: 'bg-emerald-500',
-      cancelled: 'bg-red-500',
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+      case 'preparing': return 'bg-blue-100 text-blue-800 border-blue-300'
+      case 'ready': return 'bg-green-100 text-green-800 border-green-300'
+      case 'served': return 'bg-purple-100 text-purple-800 border-purple-300'
+      case 'done': return 'bg-gray-100 text-gray-800 border-gray-300'
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-300'
+      default: return 'bg-gray-100 text-gray-800 border-gray-300'
     }
-    return colors[status] || 'bg-gray-500'
+  }
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800'
+      case 'paid': return 'bg-green-100 text-green-800'
+      case 'partially_paid': return 'bg-orange-100 text-orange-800'
+      case 'refunded': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
   }
 
   return (
-    <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div 
-          className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Utensils className="w-6 h-6" />
-              <h2 className="text-xl font-bold">Order Details</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <GlassCard className="max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white/90 backdrop-blur-sm p-6 border-b border-gray-200 flex justify-between items-start">
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <Receipt className="w-6 h-6" />
+              Order Details
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">Order ID: {order.orderid}</p>
+            <div className="flex gap-2 mt-2">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(order.status)}`}>
+                {order.status.toUpperCase()}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(order.paymentStatus)}`}>
+                {order.paymentStatus.replace('_', ' ').toUpperCase()}
+              </span>
             </div>
-            <button
-              onClick={onClose}
-              className="hover:bg-white/20 rounded-full p-2 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Customer & Table Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Customer Information
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-700">{order.customerName || 'Walk-in Customer'}</span>
+                </div>
+                {order.customerPhone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">{order.customerPhone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-purple-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Table Information
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-700">Table {order.tableNumber}</span>
+                </div>
+                {order.employeeName && (
+                  <div className="flex items-center gap-2">
+                    <ChefHat className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-700">Served by: {order.employeeName}</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Order Info Card */}
-            <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
-              <div className="grid grid-cols-2 gap-4">
+          {/* Order Timeline */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Order Timeline
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <p className="text-gray-600 mb-1">Order Placed</p>
                 <div className="flex items-center gap-2">
-                  <Hash className="w-4 h-4 text-gray-600" />
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase font-medium">Order ID</p>
-                    <p className="font-semibold">#{order.orderid?.slice(-8) || 'N/A'}</p>
-                  </div>
+                  <Calendar className="w-4 h-4 text-blue-600" />
+                  <span className="font-medium text-gray-800">
+                    {new Date(order.orderDate).toLocaleString()}
+                  </span>
                 </div>
-                
+              </div>
+              <div>
+                <p className="text-gray-600 mb-1">Last Updated</p>
                 <div className="flex items-center gap-2">
-                  <Utensils className="w-4 h-4 text-gray-600" />
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase font-medium">Table Number</p>
-                    <p className="font-semibold">Table {order.tableNumber || 'N/A'}</p>
-                  </div>
+                  <Clock className="w-4 h-4 text-purple-600" />
+                  <span className="font-medium text-gray-800">
+                    {new Date(order.updatedAt).toLocaleString()}
+                  </span>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-600" />
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase font-medium">Date</p>
-                    <p className="font-semibold">
-                      {new Date(order.orderDate || order.createdAt).toLocaleDateString('en-IN')}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-600" />
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase font-medium">Time</p>
-                    <p className="font-semibold">
-                      {new Date(order.orderDate || order.createdAt).toLocaleTimeString('en-IN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="col-span-2 pt-2 border-t border-gray-300">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 uppercase font-medium">Status</span>
-                    <span className={`${getStatusColor(order.status)} text-white text-xs font-semibold px-3 py-1 rounded-full uppercase`}>
-                      {order.status}
+              </div>
+              {order.completedAt && (
+                <div>
+                  <p className="text-gray-600 mb-1">Completed</p>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-green-600" />
+                    <span className="font-medium text-gray-800">
+                      {new Date(order.completedAt).toLocaleString()}
                     </span>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
+          </div>
 
-            {/* Customer Info */}
-            {(order.customerName || order.customerPhone) && (
-              <div className="bg-blue-50 rounded-lg p-5 border border-blue-200">
-                <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <User className="w-5 h-5 text-blue-600" />
-                  Customer Information
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {order.customerName && (
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Name</p>
-                      <p className="font-semibold">{order.customerName}</p>
-                    </div>
-                  )}
-                  {order.customerPhone && (
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Phone</p>
-                      <p className="font-semibold">{order.customerPhone}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Items Table */}
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              <div className="bg-gray-800 text-white px-4 py-3">
-                <h3 className="font-bold">Order Items</h3>
-              </div>
-              
-              <div className="bg-white">
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-2 bg-gray-100 border-b border-gray-300 px-4 py-3 text-sm font-bold text-gray-700">
-                  <div className="col-span-6">ITEM</div>
-                  <div className="col-span-2 text-center">QUANTITY</div>
-                  <div className="col-span-2 text-right">PRICE</div>
-                  <div className="col-span-2 text-right">AMOUNT</div>
-                </div>
+          {/* Order Items */}
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Order Items ({order.items.length})
+            </h3>
+            <div className="space-y-3">
+              {order.items.map((item, index) => {
+                const menuItem = typeof item.menuid === 'object' ? item.menuid : null;
+                const itemName = menuItem?.name || 'Unknown Item';
+                const itemPrice = menuItem?.price || 0;
+                const itemDescription = menuItem && 'description' in menuItem ? (menuItem as any).description : undefined;
                 
-                {/* Table Rows */}
-                <div className="divide-y divide-gray-200">
-                  {order.items.map((item, idx) => {
-                    const menuItem = typeof item.menuid === 'object' ? item.menuid : null
-                    const itemName = menuItem?.name || 'Unknown Item'
-                    const itemPrice = menuItem?.price || 0
-                    const lineTotal = itemPrice * (item.quantity || 0)
-
-                    return (
-                      <div key={idx} className="px-4 py-3">
-                        <div className="grid grid-cols-12 gap-2 text-sm items-center">
-                          <div className="col-span-6 font-medium">{itemName}</div>
-                          <div className="col-span-2 text-center">{item.quantity}</div>
-                          <div className="col-span-2 text-right">₹{itemPrice.toFixed(2)}</div>
-                          <div className="col-span-2 text-right font-semibold">₹{lineTotal.toFixed(2)}</div>
-                        </div>
+                return (
+                  <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-800">{itemName}</h4>
+                        {itemDescription && (
+                          <p className="text-sm text-gray-600 mt-1">{itemDescription}</p>
+                        )}
                         {item.notes && (
-                          <div className="mt-2 text-xs text-gray-600 italic bg-yellow-50 px-3 py-2 rounded border-l-2 border-yellow-400">
-                            <span className="font-semibold">Note:</span> {item.notes}
+                          <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded p-2">
+                            <p className="text-xs text-yellow-800">
+                              <Tag className="w-3 h-3 inline mr-1" />
+                              Note: {item.notes}
+                            </p>
                           </div>
                         )}
                       </div>
-                    )
-                  })}
-                </div>
-
-                {/* Totals */}
-                <div className="bg-gray-50 border-t-2 border-gray-300 px-4 py-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium">Subtotal</span>
-                    <span className="font-semibold">₹{order.subtotal.toFixed(2)}</span>
+                      <div className="text-right ml-4">
+                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                        <p className="text-sm text-gray-600">₹{itemPrice.toFixed(2)} each</p>
+                        <p className="font-bold text-gray-900 mt-1">
+                          ₹{(itemPrice * item.quantity).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="flex justify-between text-lg font-bold text-green-700 pt-2 border-t border-gray-300">
-                    <span>Total Amount</span>
-                    <span>₹{order.totalAmount.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* Payment Info */}
-            {order.paymentStatus && (
-              <div className="bg-green-50 rounded-lg p-5 border border-green-200">
-                <h3 className="font-bold text-gray-900 mb-3">Payment Information</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs text-gray-600 mb-1">Status</p>
-                    <p className="font-semibold uppercase text-green-700">{order.paymentStatus}</p>
-                  </div>
-                  {order.paymentMethod && (
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Method</p>
-                      <p className="font-semibold uppercase">{order.paymentMethod}</p>
+          {/* Bill Summary */}
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6">
+            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <IndianRupee className="w-4 h-4" />
+              Bill Summary
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium text-gray-800">₹{order.subtotal.toFixed(2)}</span>
+              </div>
+
+              {order.discount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount ({order.discount}%)</span>
+                  <span className="font-medium">
+                    -₹{((order.subtotal * order.discount) / 100).toFixed(2)}
+                  </span>
+                </div>
+              )}
+
+              {order.tax > 0 && (
+                <>
+                  {order.sgst !== undefined && order.cgst !== undefined ? (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">SGST ({order.sgst}%)</span>
+                        <span className="font-medium text-gray-800">
+                          ₹{((order.subtotal * (1 - order.discount / 100) * order.sgst) / 100).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">CGST ({order.cgst}%)</span>
+                        <span className="font-medium text-gray-800">
+                          ₹{((order.subtotal * (1 - order.discount / 100) * order.cgst) / 100).toFixed(2)}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Tax ({order.tax}%)</span>
+                      <span className="font-medium text-gray-800">
+                        ₹{((order.subtotal * (1 - order.discount / 100) * order.tax) / 100).toFixed(2)}
+                      </span>
                     </div>
                   )}
-                </div>
-              </div>
-            )}
+                </>
+              )}
 
-            {/* Employee Info */}
-            {order.employeeName && (
-              <div className="text-center text-sm text-gray-600">
-                Served by <span className="font-semibold text-gray-800">{order.employeeName}</span>
+              <div className="border-t-2 border-gray-300 pt-3 flex justify-between">
+                <span className="text-lg font-bold text-gray-900">Total Amount</span>
+                <span className="text-2xl font-bold text-blue-600">
+                  ₹{order.totalAmount.toFixed(2)}
+                </span>
               </div>
-            )}
+
+              {order.paymentMethod && (
+                <div className="mt-4 bg-white rounded-lg p-3 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      Payment Method
+                    </span>
+                    <span className="font-semibold text-gray-800 capitalize">
+                      {order.paymentMethod}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Footer */}
-          <div className="sticky bottom-0 bg-gray-100 px-6 py-4 border-t border-gray-300 flex justify-end gap-3">
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors"
-            >
+          {/* Actions */}
+          <div className="flex justify-end gap-2">
+            <GlassButton variant="secondary" onClick={handlePrintKOT}>
+              Print KOT
+            </GlassButton>
+            <GlassButton variant="primary" onClick={onClose}>
               Close
-            </button>
+            </GlassButton>
           </div>
         </div>
-      </div>
-    </>
+
+        {/* Hidden KOT for printing */}
+        <div className="hidden">
+          <div ref={kotRef}>
+            {order && <KitchenTicket order={order} />}
+          </div>
+        </div>
+      </GlassCard>
+    </div>
   )
 }
 

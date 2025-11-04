@@ -34,6 +34,7 @@ export interface Order {
   employeeName?: string;
   orderDate: string;
   completedAt?: string;
+  isgeneratedBill?: boolean;
   createdAt: string;
   updatedAt: string;
 }

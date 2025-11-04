@@ -12,7 +12,12 @@ export const createBill = async (orderId: string, data: any) => {
             return { success: false, message: "Order not found" };
         }
 
-        let totalAmount = order.totalAmount;
+        // Check if bill is already generated
+        if (order.isgeneratedBill) {
+            return { success: false, message: "Bill has already been generated for this order" };
+        }
+
+        let subtotal = order.subtotal;
         let discountPercentage = 0;
 
         if (Array.isArray(coupon) && coupon.length > 0) {
@@ -20,11 +25,13 @@ export const createBill = async (orderId: string, data: any) => {
                 coupon.map(async (item: string) => {
                     const couponData = await Coupon.findOne({ couponcode: item });
                     if (couponData) {
-                        if (couponData.totalUsageLimit > 0) {
-                            await Coupon.updateOne(
-                                { couponcode: item },
-                                { $inc: { totalUsageLimit: -1 } }
-                            );
+                        if (couponData.totalUsageLimit === null || couponData.totalUsageLimit > 0) {
+                            if (couponData.totalUsageLimit !== null) {
+                                await Coupon.updateOne(
+                                    { couponcode: item },
+                                    { $inc: { totalUsageLimit: -1 } }
+                                );
+                            }
                             discountPercentage += couponData.discountPercentage;
                         }
                     }
@@ -32,14 +39,17 @@ export const createBill = async (orderId: string, data: any) => {
             );
         }
 
-        const discountAmount = (totalAmount * discountPercentage) / 100;
-        totalAmount -= discountAmount;
+        // Calculate discount on subtotal
+        const discountAmount = (subtotal * discountPercentage) / 100;
+        const afterDiscount = subtotal - discountAmount;
 
-        const sgstAmount = (sgst / 100) * totalAmount;
-        const cgstAmount = (cgst / 100) * totalAmount;
+        // Calculate tax on discounted amount
+        const sgstAmount = (sgst / 100) * afterDiscount;
+        const cgstAmount = (cgst / 100) * afterDiscount;
         const taxAmount = sgstAmount + cgstAmount;
-        totalAmount += taxAmount;
-
+        
+        // Calculate final total
+        let totalAmount = afterDiscount + taxAmount;
         totalAmount = Math.ceil(totalAmount < 0 ? 0 : totalAmount);
 
         await Order.updateOne(
@@ -63,6 +73,7 @@ export const createBill = async (orderId: string, data: any) => {
             sgstAmount,
             cgstAmount,
             totalDiscount: discountPercentage,
+            discountAmount,
             order,
             message: "Bill created successfully",
         };
