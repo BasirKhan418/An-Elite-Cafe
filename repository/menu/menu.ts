@@ -7,6 +7,53 @@ export const getAllMenus = async () => {
     const menu = await Menu.find({});
     return menu;
 }
+//
+export const searchByCategoryId = async (categoryid: string) => {
+    try{
+    await ConnectDb();
+    const menus = await Menu.find({category: categoryid});
+    return {success:true,menus,message:"Menus fetched successfully" };
+    }
+    catch(error){
+        return {success:false,error,message:"Failed to fetch menus"};
+    }
+}
+//serach by status and categoryid
+export const filterByStatusAndCategoryId = async (categoryid: string, status: string) => {
+    try{
+    await ConnectDb();
+    const menus = await Menu.find({category: categoryid, status: status});
+    return {success:true,menus,message:"Menus fetched successfully" };
+    }
+    catch(error){
+        return {success:false,error,message:"Failed to fetch menus"};
+    }
+}
+//search by categoryid and search term
+export const searchByCategoryIdAndTerm = async (
+  categoryid: string,
+  searchTerm: string,
+  status: string
+) => {
+  try {
+    await ConnectDb();
+
+    const query: any = {
+      category: categoryid,
+      status: status,
+    };
+    if (searchTerm && searchTerm.trim() !== "") {
+      query.name = { $regex: searchTerm, $options: "i" };
+    }
+
+    const menus = await Menu.find(query);
+    return { success: true, menus, message: "Menus fetched successfully" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error, message: "Failed to fetch menus" };
+  }
+};
+
 
 export const createMenu = async (data: any) => {
     try{
