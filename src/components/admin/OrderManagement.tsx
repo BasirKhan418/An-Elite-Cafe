@@ -361,10 +361,10 @@ const OrderCard: React.FC<OrderCardProps> = ({
           </GlassButton>
         ) : billAlreadyGenerated ? (
           <GlassButton 
-            variant="success" 
+            variant="primary" 
             size="sm"
             onClick={() => onGenerateBill(order)}
-            className="flex-1"
+            className="flex-1 bg-green-600 hover:bg-green-700"
           >
             <Receipt className="w-3 h-3 mr-1" />
             Print Bill

@@ -182,6 +182,15 @@ function OrderHistoryContent() {
                 <span className="text-xs font-medium text-blue-600">
                   Table {order.tableNumber || 'N/A'}
                 </span>
+                {order.isgeneratedBill && order.status === 'served' && (
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs bg-green-50 text-green-700 border-green-300"
+                  >
+                    <Receipt className="w-3 h-3 mr-1" />
+                    Bill Generated
+                  </Badge>
+                )}
                 {order.paymentStatus && (
                   <Badge 
                     variant="outline" 
@@ -251,7 +260,7 @@ function OrderHistoryContent() {
               <Eye className="w-4 h-4" />
             </Button>
 
-            {order.status === 'served' && (
+            {order.status === 'served' && !order.isgeneratedBill && (
               <Button
                 size="sm"
                 onClick={() => handleGenerateBill(order)}
@@ -259,6 +268,18 @@ function OrderHistoryContent() {
               >
                 <Receipt className="w-4 h-4 mr-1" />
                 Bill
+              </Button>
+            )}
+
+            {(order.status === 'served' && order.isgeneratedBill) && (
+              <Button
+                size="sm"
+                onClick={() => handleGenerateBill(order)}
+                variant="outline"
+                className="border-green-600 text-green-600 hover:bg-green-50"
+              >
+                <Receipt className="w-4 h-4 mr-1" />
+                Print
               </Button>
             )}
 
@@ -495,8 +516,7 @@ function OrderHistoryContent() {
         }}
         onBillGenerated={() => {
           fetchOrders();
-          setShowBillingModal(false);
-          setBillingOrder(null);
+          // Don't close the modal - let user print or complete the bill
         }}
       />
     </AdminLayout>

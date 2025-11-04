@@ -47,6 +47,12 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
       
       // Check if bill is already generated
       const isAlreadyGenerated = order.isgeneratedBill || false
+      console.log('BillingModal opened:', { 
+        orderid: order.orderid,
+        isgeneratedBill: order.isgeneratedBill,
+        isAlreadyGenerated,
+        status: order.status 
+      })
       setBillGenerated(isAlreadyGenerated)
       
       setSgst(order.sgst || 2.5)
@@ -59,7 +65,7 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
       setPaymentMode('cash')
       setBillDetails(null)
     }
-  }, [isOpen, order])
+  }, [isOpen, order, order?.isgeneratedBill])
 
   const fetchCoupons = async () => {
     try {
@@ -154,7 +160,12 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
       if (response.success) {
         setBillGenerated(true)
         setBillDetails(response)
+        // Update the order object to reflect the bill has been generated
+        if (order) {
+          order.isgeneratedBill = true
+        }
         alert('✓ Bill generated successfully!')
+        onBillGenerated()
       } else {
         alert(`✗ ${response.message || 'Failed to generate bill'}`)
       }
