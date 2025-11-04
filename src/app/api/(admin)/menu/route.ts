@@ -1,9 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { verifyAdminToken } from "../../../../../utils/verify";
 import { headers } from "next/headers";
-import { CategorySchema } from "../../../../../validation/category/category";
-import { getAllCategories,createCategory, updateCategory, deleteCategory } from "../../../../../repository/category/category";
-
+import { MenuSchema } from "../../../../../validation/menu/menu";
+import { createMenu,updateMenu,deleteMenu,getAllMenus } from "../../../../../repository/menu/menu";
 export async function GET(request: NextRequest) {
     try {
         const reqHeaders = await headers();
@@ -12,8 +11,8 @@ export async function GET(request: NextRequest) {
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
-        const categories = await getAllCategories();
-        return NextResponse.json({ categories ,success:true}, { status: 200 });
+        const menus = await getAllMenus();
+        return NextResponse.json({ menus,success:true }, { status: 200 });
     }
     catch (error) {
         return NextResponse.json({ error: "Internal Server Error", success: false, message: "An unexpected error occurred" }, { status: 500 });
@@ -29,11 +28,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         const body = await request.json();
-        const parseResult = CategorySchema.safeParse(body);
+        const parseResult = MenuSchema.safeParse(body);
         if (!parseResult.success) {
-            return NextResponse.json({ error: parseResult.error, success: false, message: "Invalid category data" }, { status: 400 });
+            return NextResponse.json({ error: parseResult.error, success: false, message: "Invalid menu data" }, { status: 400 });
         }
-        const res = await createCategory(parseResult.data);
+        const res = await createMenu(parseResult.data);
         return NextResponse.json(res, { status: res.success ? 200 : 500 });
     }
     catch (error) {
@@ -50,11 +49,11 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         const body = await request.json();
-        const parseResult = CategorySchema.safeParse(body);
+        const parseResult = MenuSchema.safeParse(body);
         if (!parseResult.success) {
-            return NextResponse.json({ error: parseResult.error, success: false, message: "Invalid category data" }, { status: 400 });
+            return NextResponse.json({ error: parseResult.error, success: false, message: "Invalid menu data" }, { status: 400 });
         }
-        const res = await updateCategory(parseResult.data.categoryid, parseResult.data);
+        const res = await updateMenu(parseResult.data.menuid, parseResult.data);
         return NextResponse.json(res, { status: res.success ? 200 : 500 });
     }
     catch (error) {
@@ -72,7 +71,7 @@ export async function DELETE(request: NextRequest) {
         }
         const body = await request.json();
 
-        const res = await deleteCategory(body.categoryid);
+        const res = await deleteMenu(body.menuid);
         return NextResponse.json(res, { status: res.success ? 200 : 500 });
     }
     catch (error) {
