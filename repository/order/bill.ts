@@ -7,7 +7,7 @@ export const createBill = async (orderId: string, data: any) => {
         await ConnectDb();
         const { coupon = [], taxpercentage = 0 } = data;
 
-        const order = await Order.findOne({ orderid: orderId });
+        const order = await Order.findOne({ orderid: orderId }).populate('items.menuid');
         if (!order) {
             return { success: false, message: "Order not found" };
         }
@@ -55,6 +55,7 @@ export const createBill = async (orderId: string, data: any) => {
             totalAmount,
             totalTax: taxpercentage,
             totalDiscount: discountPercentage,
+            order,
             message: "Bill created successfully",
         };
     } catch (error) {
