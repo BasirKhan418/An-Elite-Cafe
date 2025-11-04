@@ -129,68 +129,80 @@ const EmployeeManagement: React.FC = () => {
   }
 
   const handleDeleteEmployee = async (employee: Employee) => {
-    if (window.confirm(`Are you sure you want to remove ${employee.name}?`)) {
-      try {
-        const token = localStorage.getItem('adminToken')
-        
-        const response = await fetch('/api/employees', {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email: employee.email })
-        })
+    toast.warning(`Remove ${employee.name}?`, {
+      description: "This action cannot be undone.",
+      action: {
+        label: "Remove",
+        onClick: async () => {
+          try {
+            const token = localStorage.getItem('adminToken')
+            
+            const response = await fetch('/api/employees', {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email: employee.email })
+            })
 
-        const data = await response.json()
+            const data = await response.json()
 
-        if (data.success) {
-          setEmployees(employees.filter(e => e._id !== employee._id))
-          toast.success('Employee removed successfully!')
-        } else {
-          console.error('Error deleting employee:', data.message)
-          toast.error(data.message || 'Error deleting employee')
+            if (data.success) {
+              setEmployees(employees.filter(e => e._id !== employee._id))
+              toast.success('Employee removed successfully!')
+            } else {
+              console.error('Error deleting employee:', data.message)
+              toast.error(data.message || 'Error deleting employee')
+            }
+          } catch (error) {
+            console.error('Error deleting employee:', error)
+            toast.error('Error deleting employee. Please try again.')
+          }
         }
-      } catch (error) {
-        console.error('Error deleting employee:', error)
-        toast.error('Error deleting employee. Please try again.')
       }
-    }
+    })
   }
 
   const handleToggleStatus = async (employee: Employee) => {
     const action = employee.isActive ? 'deactivate' : 'activate'
-    if (window.confirm(`Are you sure you want to ${action} ${employee.name}?`)) {
-      try {
-        const token = localStorage.getItem('adminToken')
-        
-        const response = await fetch('/api/employees', {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email: employee.email })
-        })
+    toast.warning(`${action.charAt(0).toUpperCase() + action.slice(1)} ${employee.name}?`, {
+      description: `Employee will be ${action}d`,
+      action: {
+        label: action.charAt(0).toUpperCase() + action.slice(1),
+        onClick: async () => {
+          try {
+            const token = localStorage.getItem('adminToken')
+            
+            const response = await fetch('/api/employees', {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email: employee.email })
+            })
 
-        const data = await response.json()
+            const data = await response.json()
 
-        if (data.success) {
-          setEmployees(employees.map(e => 
-            e._id === employee._id 
-              ? { ...e, isActive: !e.isActive }
-              : e
-          ))
-          toast.success(`Employee ${action}d successfully!`)
-        } else {
-          console.error('Error toggling status:', data.message)
-          toast.error(data.message || 'Error toggling status')
+            if (data.success) {
+              setEmployees(employees.map(e => 
+                e._id === employee._id 
+                  ? { ...e, isActive: !e.isActive }
+                  : e
+              ))
+              toast.success(`Employee ${action}d successfully!`)
+            } else {
+              console.error('Error toggling status:', data.message)
+              toast.error(data.message || 'Error toggling status')
+            }
+          } catch (error) {
+            console.error('Error toggling status:', error)
+            toast.error('Error toggling status. Please try again.')
+          }
         }
-      } catch (error) {
-        console.error('Error toggling status:', error)
-        toast.error('Error toggling status. Please try again.')
       }
-    }
+    })
   }
 
   const validateForm = (): boolean => {

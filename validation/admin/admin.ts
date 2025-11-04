@@ -73,8 +73,30 @@ export const TableManagementSchema = z.object({
     status: z.enum(["available", "occupied", "reserved"]).optional()
 });
 
+export const AdminSendOTPSchema = z.object({
+    email: z.string().email("Invalid email format"),
+    currentPassword: z.string().min(6, "Password must be at least 6 characters")
+});
+
+export const AdminVerifyOTPSchema = z.object({
+    email: z.string().email("Invalid email format"),
+    otp: z.string().length(6, "OTP must be 6 digits")
+});
+
+export const AdminChangePasswordSchema = z.object({
+    email: z.string().email("Invalid email format"),
+    otp: z.string().length(6, "OTP must be 6 digits"),
+    newPassword: z.string()
+        .min(8, "Password must be at least 8 characters")
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+               "Password must contain at least one uppercase letter, lowercase letter, number, and special character")
+});
+
 export type AdminLoginData = z.infer<typeof AdminLoginSchema>;
 export type AdminRegistrationData = z.infer<typeof AdminRegistrationSchema>;
 export type AdminUpdateData = z.infer<typeof AdminUpdateSchema>;
 export type EmployeeManagementData = z.infer<typeof EmployeeManagementSchema>;
 export type TableManagementData = z.infer<typeof TableManagementSchema>;
+export type AdminSendOTPData = z.infer<typeof AdminSendOTPSchema>;
+export type AdminVerifyOTPData = z.infer<typeof AdminVerifyOTPSchema>;
+export type AdminChangePasswordData = z.infer<typeof AdminChangePasswordSchema>;

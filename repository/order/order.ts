@@ -105,3 +105,18 @@ export const getOrderbyDateAndStatus = async (date: string, status: string) => {
         return { success: false, error, message: "Failed to fetch orders by date and status" };
     }
 }
+
+export const getActiveOrdersByTable = async (tableid: string) => {
+    try {
+        await ConnectDb();
+        // Get orders that are not done or cancelled for the specific table
+        const activeOrders = await Order.find({ 
+            tableid: tableid,
+            status: { $nin: ['done', 'cancelled'] }
+        }).populate('items.menuid', 'name price category image').sort({ createdAt: -1 });
+        
+        return { success: true, orders: activeOrders };
+    } catch (error) {
+        return { success: false, error, message: "Failed to fetch active orders for table" };
+    }
+}

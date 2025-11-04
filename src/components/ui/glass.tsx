@@ -169,15 +169,17 @@ const GlassTable: React.FC<GlassTableProps> = ({ headers, data, onRowAction, act
             <tr key={rowIndex} className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors">
               {headers.map((header, colIndex) => {
                 // Skip the Actions column data rendering if it's the actions header
-                if (header === 'Actions' && actions) {
+                if (header === 'Actions' && (actions || row._actions)) {
+                  const rowActions = row._actions || actions
                   return (
                     <td key={colIndex} className="py-3 px-4">
                       <div className="flex gap-2 flex-wrap">
-                        {actions.map((action) => (
+                        {rowActions.map((action: any) => (
                           <GlassButton
                             key={action.key}
                             size="sm"
                             variant={action.variant || "secondary"}
+                            disabled={action.disabled}
                             onClick={() => onRowAction?.(row, action.key)}
                           >
                             {action.label}

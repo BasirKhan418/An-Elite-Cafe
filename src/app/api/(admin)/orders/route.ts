@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { OrderSchema } from "../../../../../validation/order/order";
 import { createOrder,updateOrder } from "../../../../../repository/order/order";
 import { changeTableStatus } from "../../../../../repository/tables/changestatus";
-import { getAllOrders ,getOrderbyDate,getOrderbyStatus,getOrderbyDateAndStatus} from "../../../../../repository/order/order";
+import { getAllOrders ,getOrderbyDate,getOrderbyStatus,getOrderbyDateAndStatus, getActiveOrdersByTable } from "../../../../../repository/order/order";
 export async function GET(request: NextRequest) {
     try {
         const reqHeaders = await headers();

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { GlassCard, GlassButton, GlassTable, GlassModal, GlassInput } from '@/components/ui/glass'
 import { 
   Utensils, 
@@ -10,7 +11,8 @@ import {
   CheckCircle2, 
   CircleDot, 
   Clock,
-  RefreshCw
+  RefreshCw,
+  ExternalLink
 } from 'lucide-react'
 import { toast } from 'sonner'
 interface Table {
@@ -30,6 +32,7 @@ interface TableFormData {
 }
 
 const TableManagement: React.FC = () => {
+  const router = useRouter()
   const [tables, setTables] = useState<Table[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -41,6 +44,7 @@ const TableManagement: React.FC = () => {
     status: 'available'
   })
   const [errors, setErrors] = useState<{[key: string]: string}>({})
+  const [checkingOrder, setCheckingOrder] = useState<string | null>(null)
 
   useEffect(() => {
     fetchTables()
@@ -99,32 +103,39 @@ const TableManagement: React.FC = () => {
   }
 
   const handleDeleteTable = async (table: Table) => {
-    if (window.confirm(`Are you sure you want to delete ${table.name}?`)) {
-      try {
-        const token = localStorage.getItem('adminToken')
-        
-        const response = await fetch('/api/tables/manage', {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ tableid: table.tableid })
-        })
+    toast.warning(`Delete ${table.name}?`, {
+      description: "This action cannot be undone.",
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            const token = localStorage.getItem('adminToken')
+            
+            const response = await fetch('/api/tables/manage', {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ tableid: table.tableid })
+            })
 
-        const data = await response.json()
+            const data = await response.json()
 
-        if (data.success) {
-          setTables(tables.filter(t => t._id !== table._id))
-        } else {
-          console.error('Error deleting table:', data.message)
-          toast.error(data.message || 'Error deleting table')
+            if (data.success) {
+              setTables(tables.filter(t => t._id !== table._id))
+              toast.success(`${table.name} deleted successfully`)
+            } else {
+              console.error('Error deleting table:', data.message)
+              toast.error(data.message || 'Error deleting table')
+            }
+          } catch (error) {
+            console.error('Error deleting table:', error)
+            toast.error('Error deleting table. Please try again.')
+          }
         }
-      } catch (error) {
-        console.error('Error deleting table:', error)
-        toast.error('Error deleting table. Please try again.')
       }
-    }
+    })
   }
 
   const validateForm = (): boolean => {
@@ -213,7 +224,28 @@ const TableManagement: React.FC = () => {
     }
   }
 
-  const handleTableAction = (table: Table, action: string) => {
+  const checkActiveOrders = async (tableid: string) => {
+    try {
+      const token = localStorage.getItem('adminToken')
+      const response = await fetch(`/api/orders/active?tableid=${tableid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        return data.orders || []
+      }
+      return []
+    } catch (error) {
+      console.error('Error checking active orders:', error)
+      return []
+    }
+  }
+
+  const handleTableAction = async (table: Table, action: string) => {
     switch (action) {
       case 'edit':
         handleEditTable(table)
@@ -222,14 +254,117 @@ const TableManagement: React.FC = () => {
         handleDeleteTable(table)
         break
       case 'status':
-        // Toggle status
-        const newStatus = table.status === 'available' ? 'occupied' : 'available'
+        // Check if table is occupied and has active orders
+        if (table.status === 'occupied') {
+          setCheckingOrder(table._id)
+          try {
+            const activeOrders = await checkActiveOrders(table.tableid)
+            if (activeOrders.length > 0) {
+              const order = activeOrders[0] // Get the latest active order
+              const orderNumber = order.orderid?.slice(-8) || order.orderid || 'Unknown'
+              toast.info(`Table ${table.name} has active order`, {
+                description: `Order #${orderNumber} - Click to view order details`,
+                action: {
+                  label: "View Order",
+                  onClick: () => router.push(`/admin/orders/active`)
+                },
+                duration: 4000
+              })
+              // Redirect to the active orders page
+              setTimeout(() => {
+                router.push(`/admin/orders/active`)
+              }, 2000)
+              return
+            } else {
+              // No active orders found, but table is marked as occupied
+              // Automatically mark it as available and persist to backend
+              await updateTableStatusInBackend(table, 'available')
+              return
+            }
+          } catch (error) {
+            console.error('Error checking active orders:', error)
+            toast.error('Error checking active orders')
+          } finally {
+            setCheckingOrder(null)
+          }
+        }
+        
+        // Toggle status only if no active orders
+        await toggleTableStatus(table)
+        break
+    }
+  }
+
+  const toggleTableStatus = async (table: Table) => {
+    try {
+      const newStatus = table.status === 'available' ? 'occupied' : 'available'
+      
+      // Update in backend first
+      const token = localStorage.getItem('adminToken')
+      const response = await fetch('/api/tables/manage', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          tableid: table.tableid,
+          name: table.name,
+          capacity: table.capacity,
+          status: newStatus
+        })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        // Update local state
         setTables(tables.map(t => 
           t._id === table._id 
             ? { ...t, status: newStatus }
             : t
         ))
-        break
+        toast.success(`Table ${table.name} status changed to ${newStatus}`)
+      } else {
+        toast.error('Failed to update table status')
+      }
+    } catch (error) {
+      console.error('Error updating table status:', error)
+      toast.error('Error updating table status')
+    }
+  }
+
+  const updateTableStatusInBackend = async (table: Table, newStatus: 'available' | 'occupied' | 'reserved') => {
+    try {
+      const token = localStorage.getItem('adminToken')
+      const response = await fetch('/api/tables/manage', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          tableid: table.tableid,
+          name: table.name,
+          capacity: table.capacity,
+          status: newStatus
+        })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        // Update local state
+        setTables(tables.map(t => 
+          t._id === table._id 
+            ? { ...t, status: newStatus }
+            : t
+        ))
+        toast.success(`Table ${table.name} marked as ${newStatus} (no active orders found)`)
+      } else {
+        toast.error('Failed to update table status')
+      }
+    } catch (error) {
+      console.error('Error updating table status:', error)
+      toast.error('Error updating table status')
     }
   }
 
@@ -250,10 +385,16 @@ const TableManagement: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-800">Table Management</h2>
           <p className="text-gray-600">Manage restaurant tables and their status</p>
         </div>
-        <GlassButton variant="primary" onClick={handleAddTable} className="flex items-center gap-2">
-          <Plus className="w-5 h-5" />
-          <span>Add Table</span>
-        </GlassButton>
+        <div className="flex gap-3">
+          <GlassButton variant="secondary" onClick={fetchTables} className="flex items-center gap-2">
+            <RefreshCw className="w-5 h-5" />
+            <span>Refresh</span>
+          </GlassButton>
+          <GlassButton variant="primary" onClick={handleAddTable} className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            <span>Add Table</span>
+          </GlassButton>
+        </div>
       </div>
 
       {/* Table Stats */}
@@ -316,16 +457,25 @@ const TableManagement: React.FC = () => {
                   <span className={getStatusColor(table.status)}>
                     {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
                   </span>
+                  {checkingOrder === table._id && (
+                    <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
+                  )}
                 </div>
               ),
               'Created': new Date(table.createdAt).toLocaleDateString(),
-              _originalData: table
+              _originalData: table,
+              _actions: [
+                { label: 'Edit', key: 'edit', variant: 'secondary' as const },
+                { 
+                  label: checkingOrder === table._id ? 'Checking...' : 
+                         table.status === 'occupied' ? 'View Order' : 'Toggle Status', 
+                  key: 'status', 
+                  variant: 'primary' as const,
+                  disabled: checkingOrder === table._id
+                },
+                { label: 'Delete', key: 'delete', variant: 'danger' as const }
+              ]
             }))}
-            actions={[
-              { label: 'Edit', key: 'edit', variant: 'secondary' },
-              { label: 'Toggle Status', key: 'status', variant: 'primary' },
-              { label: 'Delete', key: 'delete', variant: 'danger' }
-            ]}
             onRowAction={(row, action) => handleTableAction(row._originalData, action)}
           />
         ) : (

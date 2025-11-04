@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   ChefHat
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -86,9 +87,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   }, [currentPage])
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout()
-    }
+    toast.warning('Logout?', {
+      description: "You will be signed out of your admin session.",
+      action: {
+        label: "Logout",
+        onClick: () => logout()
+      }
+    })
   }
 
   const isCurrentPageActive = (item: NavItem) => {

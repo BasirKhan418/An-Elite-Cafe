@@ -155,4 +155,21 @@ export class AdminAPI {
     })
     return response.json()
   }
+
+  // Analytics API
+  static async getAnalytics(params?: { 
+    period?: 'day' | 'week' | 'month' | 'year';
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const queryParams = new URLSearchParams()
+    if (params?.period) queryParams.append('period', params.period)
+    if (params?.startDate) queryParams.append('startDate', params.startDate)
+    if (params?.endDate) queryParams.append('endDate', params.endDate)
+
+    const response = await fetch(`/api/dashboard/analytics?${queryParams}`, {
+      headers: this.getAuthHeaders()
+    })
+    return response.json()
+  }
 }
