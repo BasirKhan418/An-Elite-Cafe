@@ -44,13 +44,19 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
   useEffect(() => {
     if (isOpen && order) {
       fetchCoupons()
-      setAppliedCoupons([])
-      setCouponCode('')
+      
+      // Check if bill is already generated
+      const isAlreadyGenerated = order.isgeneratedBill || false
+      setBillGenerated(isAlreadyGenerated)
+      
       setSgst(order.sgst || 2.5)
       setCgst(order.cgst || 2.5)
+      
+      // For already generated bills, coupons are already applied to the amounts
+      // so we don't need to show them again
+      setAppliedCoupons([])
+      setCouponCode('')
       setPaymentMode('cash')
-      // Check if bill is already generated
-      setBillGenerated(order.isgeneratedBill || false)
       setBillDetails(null)
     }
   }, [isOpen, order])
@@ -258,11 +264,11 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <GlassCard className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white/90 backdrop-blur-sm p-6 border-b border-gray-200 flex justify-between items-center">
+        <div className="sticky z-50 top-0 bg-white/90 backdrop-blur-sm p-6 border-b border-gray-200 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
               <Receipt className="w-6 h-6" />
-              {billGenerated ? 'Bill Summary' : 'Generate Bill'}
+              {(billGenerated || order.isgeneratedBill) ? 'Bill Summary' : 'Generate Bill'}
             </h2>
             <p className="text-sm text-gray-600">
               Order #{order.orderid.slice(-8)} - Table {order.tableNumber}
@@ -274,14 +280,14 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Warning if bill already generated */}
-          {order.isgeneratedBill && !billGenerated && (
-            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          {/* Info message if viewing already generated bill */}
+          {(order.isgeneratedBill || billGenerated) && (
+            <div className="bg-blue-50 border border-blue-300 rounded-lg p-4 flex items-start gap-3">
+              <Receipt className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-yellow-800">Bill Already Generated</p>
-                <p className="text-sm text-yellow-700 mt-1">
-                  The bill for this order has already been generated. You can only complete the order now.
+                <p className="font-semibold text-blue-800">Bill Generated</p>
+                <p className="text-sm text-blue-700 mt-1">
+                  {order.status === 'done' ? 'This order has been completed. You can print the bill again if needed.' : 'You can print the bill or complete the order.'}
                 </p>
               </div>
             </div>
@@ -414,7 +420,8 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
                       step="0.1"
                       value={sgst}
                       onChange={(e) => setSgst(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      disabled={billGenerated || order.isgeneratedBill}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="2.5"
                     />
                   </div>
@@ -431,7 +438,8 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
                       step="0.1"
                       value={cgst}
                       onChange={(e) => setCgst(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      disabled={billGenerated || order.isgeneratedBill}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                       placeholder="2.5"
                     />
                   </div>
@@ -516,14 +524,14 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
             <GlassButton variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </GlassButton>
-            {!billGenerated ? (
+            {!billGenerated && !order.isgeneratedBill ? (
               <GlassButton 
                 variant="primary" 
                 onClick={handleGenerateBill}
-                disabled={processing || (order?.isgeneratedBill || false)}
+                disabled={processing}
                 className="flex-1"
               >
-                {processing ? 'Generating...' : (order?.isgeneratedBill ? 'Bill Already Generated' : 'Generate Bill')}
+                {processing ? 'Generating...' : 'Generate Bill'}
               </GlassButton>
             ) : (
               <>
@@ -535,14 +543,16 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
                   <Printer className="w-4 h-4 mr-2" />
                   Print Bill
                 </GlassButton>
-                <GlassButton 
-                  variant="primary" 
-                  onClick={handleCompleteBill}
-                  disabled={processing}
-                  className="flex-1"
-                >
-                  {processing ? 'Processing...' : 'Complete Order'}
-                </GlassButton>
+                {order.status !== 'done' && (
+                  <GlassButton 
+                    variant="primary" 
+                    onClick={handleCompleteBill}
+                    disabled={processing}
+                    className="flex-1"
+                  >
+                    {processing ? 'Processing...' : 'Complete Order'}
+                  </GlassButton>
+                )}
               </>
             )}
           </div>

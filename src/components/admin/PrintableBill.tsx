@@ -10,6 +10,23 @@ interface PrintableBillProps {
   cgst: number
 }
 
+const formatDate = (iso: string) => {
+  const d = new Date(iso)
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yyyy = d.getFullYear()
+  return `${dd}/${mm}/${yyyy}`
+}
+
+const formatTime = (iso: string) => {
+  const d = new Date(iso)
+  const hh = String(d.getHours()).padStart(2, '0')
+  const min = String(d.getMinutes()).padStart(2, '0')
+  return `${hh}:${min}`
+}
+
+const dots = '........................................'
+
 const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst, cgst }) => {
   const calculateBill = () => {
     const subtotal = order.subtotal
@@ -32,143 +49,204 @@ const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst
   const bill = calculateBill()
 
   return (
-    <div className="print-bill w-full max-w-[375px] mx-auto bg-white text-black p-6" style={{ fontFamily: 'Arial, sans-serif' }}>
-      {/* Header */}
-      <div className="text-center pb-4 mb-4" style={{ borderBottom: '2px solid #000' }}>
-        <h1 className="text-2xl font-bold mb-1" style={{ letterSpacing: '1px' }}>AN ELITE CAFÉ</h1>
-        <p className="text-xs text-gray-600 uppercase tracking-wide">Tax Invoice</p>
-      </div>
+    <div
+      className="bill-wrapper"
+      style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+    >
+      <div
+        className="bill-print"
+        style={{
+          width: 280,
+          margin: '0 auto',
+          color: '#000',
+          background: '#fff',
+          padding: '8px 12px',
+          fontFamily: 'Courier New, monospace',
+          WebkitFontSmoothing: 'antialiased',
+          MozOsxFontSmoothing: 'grayscale',
+        }}
+      >
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 6 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>AN ELITE CAFÉ</div>
+          <div style={{ fontSize: 11, marginTop: 2 }}>TAX INVOICE</div>
+        </div>
 
-      {/* Order Info */}
-      <div className="pb-3 mb-4" style={{ borderBottom: '1px dashed #666' }}>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="text-gray-600">Order:</span>
-            <span className="font-semibold ml-2">#{order.orderid.slice(-8)}</span>
+        <div style={{ textAlign: 'center', fontSize: 11, letterSpacing: 1 }}>{dots}</div>
+
+        {/* Meta rows */}
+        <div style={{ fontSize: 11, marginTop: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <span>ORDER:</span>
+              <span style={{ marginLeft: 6 }}>#{order.orderid.slice(-8).toUpperCase()}</span>
+            </div>
+            <div>
+              <span>TABLE:</span>
+              <span style={{ marginLeft: 6 }}>Table {order.tableNumber}</span>
+            </div>
           </div>
-          <div className="text-right">
-            <span className="text-gray-600">Table:</span>
-            <span className="font-semibold ml-2">{order.tableNumber}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Date:</span>
-            <span className="ml-2">{new Date(order.orderDate).toLocaleDateString('en-IN')}</span>
-          </div>
-          <div className="text-right">
-            <span className="text-gray-600">Time:</span>
-            <span className="ml-2">{new Date(order.orderDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+            <div>
+              <span>TIME:</span>
+              <span style={{ marginLeft: 6 }}>{formatTime(order.orderDate)}</span>
+            </div>
+            <div>
+              <span>DATE:</span>
+              <span style={{ marginLeft: 6 }}>{formatDate(order.orderDate)}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Customer Info */}
-      {(order.customerName || order.customerPhone) && (
-        <div className="pb-3 mb-4" style={{ borderBottom: '1px dashed #666' }}>
-          <div className="text-sm">
-            {order.customerName && (
-              <div className="mb-1">
-                <span className="text-gray-600">Name:</span>
-                <span className="font-medium ml-2">{order.customerName}</span>
-              </div>
-            )}
-            {order.customerPhone && (
-              <div>
-                <span className="text-gray-600">Phone:</span>
-                <span className="font-medium ml-2">{order.customerPhone}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Items */}
-      <div className="pb-3 mb-4" style={{ borderBottom: '1px dashed #666' }}>
-        <h3 className="font-semibold text-sm mb-3 text-gray-700">ORDER ITEMS</h3>
-        {order.items.map((item, index) => {
-          const menuItem = typeof item.menuid === 'object' ? item.menuid : null
-          const itemName = menuItem?.name || 'Unknown Item'
-          const itemPrice = menuItem?.price || 0
-          
-          return (
-            <div key={index} className="mb-3">
-              <div className="flex justify-between items-start text-sm">
-                <div className="flex-1">
-                  <div className="font-medium">{itemName}</div>
-                  <div className="text-xs text-gray-600">₹{itemPrice.toFixed(2)} × {item.quantity}</div>
+        {/* Customer Info */}
+        {(order.customerName || order.customerPhone) && (
+          <>
+            <div style={{ textAlign: 'center', fontSize: 11, marginTop: 8 }}>{dots}</div>
+            <div style={{ fontSize: 11, marginTop: 6 }}>
+              {order.customerName && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span>NAME:</span>
+                  <span>{order.customerName.toUpperCase()}</span>
                 </div>
-                <div className="font-semibold">₹{(itemPrice * item.quantity).toFixed(2)}</div>
-              </div>
-              {item.notes && (
-                <div className="mt-1 ml-2 text-xs text-gray-600 italic bg-yellow-50 p-2 rounded border-l-2 border-yellow-400">
-                  Note: {item.notes}
+              )}
+              {order.customerPhone && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>PHONE:</span>
+                  <span>{order.customerPhone}</span>
                 </div>
               )}
             </div>
-          )
-        })}
-      </div>
+          </>
+        )}
 
-      {/* Bill Summary */}
-      <div className="pb-3 mb-4">
-        <h3 className="font-semibold text-sm mb-3 text-gray-700">BILL SUMMARY</h3>
-        
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">₹{bill.subtotal.toFixed(2)}</span>
+        <div style={{ textAlign: 'center', fontSize: 11, marginTop: 8 }}>{dots}</div>
+
+        {/* Items Header */}
+        <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '20px 1fr 40px 50px', columnGap: 4, marginBottom: 4 }}>
+            <div>QTY</div>
+            <div>ITEM</div>
+            <div style={{ textAlign: 'right' }}>RATE</div>
+            <div style={{ textAlign: 'right' }}>AMOUNT</div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', fontSize: 11 }}>{dots}</div>
+
+        {/* Items list */}
+        <div style={{ marginTop: 6 }}>
+          {order.items.map((item, idx) => {
+            const menuItem = typeof item.menuid === 'object' ? item.menuid : null
+            const itemName = (menuItem?.name || 'ITEM').toUpperCase()
+            const itemPrice = menuItem?.price || 0
+            const qty = item.quantity || 0
+            const amount = itemPrice * qty
+            const note = (item.notes || '').trim()
+            
+            return (
+              <div key={idx} style={{ marginBottom: 6 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '20px 1fr 40px 50px', columnGap: 4, fontSize: 11 }}>
+                  <div style={{ fontWeight: 700 }}>{qty}</div>
+                  <div style={{ fontWeight: 700 }}>{itemName}</div>
+                  <div style={{ textAlign: 'right' }}>₹{itemPrice.toFixed(0)}</div>
+                  <div style={{ textAlign: 'right', fontWeight: 700 }}>₹{amount.toFixed(0)}</div>
+                </div>
+                {note && (
+                  <div style={{ fontSize: 10, marginTop: 2, paddingLeft: 24 }}>
+                    <span>NOTE:</span> <span>{note.toUpperCase()}</span>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        <div style={{ textAlign: 'center', fontSize: 11, marginTop: 4 }}>{dots}</div>
+
+        {/* Bill Summary */}
+        <div style={{ marginTop: 6, fontSize: 11 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span>SUBTOTAL:</span>
+            <span style={{ fontWeight: 700 }}>₹{bill.subtotal.toFixed(2)}</span>
           </div>
 
           {discount > 0 && (
             <>
-              <div className="flex justify-between text-green-600">
-                <span>Discount ({discount}%)</span>
-                <span>-₹{bill.discountAmount.toFixed(2)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span>DISCOUNT ({discount}%):</span>
+                <span style={{ fontWeight: 700 }}>-₹{bill.discountAmount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">After Discount</span>
-                <span className="font-medium">₹{bill.afterDiscount.toFixed(2)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span>AFTER DISCOUNT:</span>
+                <span style={{ fontWeight: 700 }}>₹{bill.afterDiscount.toFixed(2)}</span>
               </div>
             </>
           )}
 
-          <div className="flex justify-between">
-            <span className="text-gray-600">SGST ({sgst}%)</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span>SGST ({sgst}%):</span>
             <span>₹{bill.sgstAmount.toFixed(2)}</span>
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-gray-600">CGST ({cgst}%)</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span>CGST ({cgst}%):</span>
             <span>₹{bill.cgstAmount.toFixed(2)}</span>
           </div>
 
-          <div className="flex justify-between pt-2" style={{ borderTop: '1px solid #ccc' }}>
-            <span className="font-semibold">Total GST</span>
-            <span className="font-semibold">₹{(bill.sgstAmount + bill.cgstAmount).toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between pt-3 text-lg" style={{ borderTop: '2px solid #000' }}>
-            <span className="font-bold">GRAND TOTAL</span>
-            <span className="font-bold">₹{bill.total.toFixed(2)}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span>TOTAL GST:</span>
+            <span style={{ fontWeight: 700 }}>₹{(bill.sgstAmount + bill.cgstAmount).toFixed(2)}</span>
           </div>
         </div>
-      </div>
 
-      {/* Payment Status */}
-      {order.paymentStatus && (
-        <div className="text-center text-sm mb-4 bg-gray-50 p-3 rounded">
-          <div className="font-semibold mb-1">Payment: {order.paymentStatus.toUpperCase().replace('_', ' ')}</div>
-          {order.paymentMethod && (
-            <div className="text-gray-600">Method: {order.paymentMethod.toUpperCase()}</div>
-          )}
+        <div style={{ textAlign: 'center', fontSize: 11, marginTop: 4 }}>{dots}</div>
+
+        {/* Grand Total */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginTop: 8, fontSize: 12 }}>
+          <div>GRAND TOTAL:</div>
+          <div>₹{bill.total.toFixed(2)}</div>
         </div>
-      )}
 
-      {/* Footer */}
-      <div className="text-center pt-4" style={{ borderTop: '1px dashed #666' }}>
-        <p className="text-sm font-medium mb-2">Thank you for dining with us!</p>
-        <p className="text-xs text-gray-500">AN ELITE CAFE</p>
-        <p className="text-xs text-gray-500 mt-1">Visit Again!</p>
+        {/* Payment Status */}
+        {order.paymentStatus && (
+          <>
+            <div style={{ textAlign: 'center', fontSize: 11, marginTop: 8 }}>{dots}</div>
+            <div style={{ textAlign: 'center', marginTop: 6, fontSize: 11 }}>
+              <div style={{ fontWeight: 700 }}>PAYMENT: {order.paymentStatus.toUpperCase().replace('_', ' ')}</div>
+              {order.paymentMethod && (
+                <div style={{ marginTop: 2 }}>METHOD: {order.paymentMethod.toUpperCase()}</div>
+              )}
+            </div>
+          </>
+        )}
+
+        <div style={{ textAlign: 'center', fontSize: 11, marginTop: 8 }}>{dots}</div>
+
+        {/* Footer */}
+        <div style={{ textAlign: 'center', marginTop: 8 }}>
+          <div style={{ fontWeight: 700, fontSize: 12 }}>THANK YOU FOR DINING WITH US!</div>
+          <div style={{ fontSize: 11, marginTop: 4 }}>AN ELITE CAFE</div>
+          <div style={{ fontSize: 11, marginTop: 2 }}>VISIT AGAIN!</div>
+        </div>
       </div>
+      <style jsx>{`
+        /* Ensure the bill centers on both screen and print */
+        @media print {
+          .bill-wrapper {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: flex-start !important;
+          }
+          .bill-print {
+            margin: 0 auto !important;
+          }
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        }
+      `}</style>
     </div>
   )
 }

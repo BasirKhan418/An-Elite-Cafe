@@ -14,7 +14,8 @@ import {
   ArrowRight,
   Package,
   AlertCircle,
-  XCircle
+  XCircle,
+  Receipt
 } from 'lucide-react'
 
 interface MenuItem {
@@ -48,6 +49,7 @@ interface Order {
   employeeName?: string
   orderDate: string
   completedAt?: string
+  isgeneratedBill?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -312,7 +314,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
   getNextStatus
 }) => {
   const nextStatus = getNextStatus(order.status)
-  const canGenerateBill = order.status === 'served'
+  const canGenerateBill = order.status === 'served' && !order.isgeneratedBill
+  const billAlreadyGenerated = order.isgeneratedBill && order.status !== 'done'
 
   return (
     <div className={`border-l-4 rounded-lg p-4 ${getStatusColor(order.status)} transition-all hover:shadow-md`}>
@@ -355,6 +358,16 @@ const OrderCard: React.FC<OrderCardProps> = ({
           >
             <IndianRupee className="w-3 h-3 mr-1" />
             Generate Bill
+          </GlassButton>
+        ) : billAlreadyGenerated ? (
+          <GlassButton 
+            variant="success" 
+            size="sm"
+            onClick={() => onGenerateBill(order)}
+            className="flex-1"
+          >
+            <Receipt className="w-3 h-3 mr-1" />
+            Print Bill
           </GlassButton>
         ) : nextStatus && (
           <GlassButton 
