@@ -323,7 +323,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             {getStatusIcon(order.status)}
-            <span className="font-bold text-gray-800">#{order.orderid.slice(-8)}</span>
+            <span className="font-bold text-gray-800">{order.orderid}</span>
           </div>
           <p className="text-sm text-gray-600">
             {order.customerName || 'Walk-in Customer'}

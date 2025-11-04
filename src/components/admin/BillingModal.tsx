@@ -212,7 +212,7 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Bill - Order #${order?.orderid.slice(-8)}</title>
+          <title>Bill - Order ${order?.orderid}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
             * {
@@ -285,7 +285,7 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
               {(billGenerated || order.isgeneratedBill) ? 'Bill Summary' : 'Generate Bill'}
             </h2>
             <p className="text-sm text-gray-600">
-              Order #{order.orderid.slice(-8)} - Table {order.tableNumber}
+              Order ID: {order.orderid} - Table {order.tableNumber}
             </p>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
