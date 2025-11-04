@@ -226,8 +226,14 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
               padding: 0;
               margin: 0;
             }
-            .print-bill {
-              max-width: 375px;
+            /* Match the classes used by PrintableBill so the preview centers correctly */
+            .bill-wrapper {
+              width: 100%;
+              display: flex;
+              justify-content: center;
+            }
+            .bill-print {
+              max-width: 280px;
               margin: 0 auto;
               background: white;
             }
@@ -235,10 +241,7 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
               body {
                 background: white;
               }
-              .print-bill {
-                max-width: 100%;
-                box-shadow: none;
-              }
+              .bill-print { box-shadow: none; }
             }
             @page {
               size: auto;
@@ -549,10 +552,10 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
                 <GlassButton 
                   variant="secondary" 
                   onClick={handlePrintBill}
-                  className="flex-1"
+                  className="flex-1 flex items-center justify-center gap-2"
                 >
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print Bill
+                  <Printer className="w-4 h-4" />
+                  <span>Print Bill</span>
                 </GlassButton>
                 {order.status !== 'done' && (
                   <GlassButton 
