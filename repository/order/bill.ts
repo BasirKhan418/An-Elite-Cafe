@@ -15,7 +15,6 @@ export const createBill = async (orderId: string, data: any) => {
     let totalAmount = order.totalAmount;
     let discountPercentage = 0;
 
-    // ✅ Apply coupon discounts (if any)
     if (Array.isArray(coupon) && coupon.length > 0) {
       await Promise.all(
         coupon.map(async (item: string) => {
@@ -33,15 +32,13 @@ export const createBill = async (orderId: string, data: any) => {
       );
     }
 
-    // ✅ Apply discount before tax
     const discountAmount = (totalAmount * discountPercentage) / 100;
     totalAmount -= discountAmount;
 
-    // ✅ Apply tax on discounted amount
+
     const taxAmount = (taxpercentage / 100) * totalAmount;
     totalAmount += taxAmount;
 
-    // ✅ Prevent negative values and ceil the final result
     totalAmount = Math.ceil(totalAmount < 0 ? 0 : totalAmount);
 
     await Order.updateOne(
