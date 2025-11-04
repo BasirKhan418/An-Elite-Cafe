@@ -5,7 +5,8 @@ export enum OrderStatus {
     PREPARING = "preparing", 
     READY = "ready",
     SERVED = "served",
-    CANCELLED = "cancelled"
+    CANCELLED = "cancelled",
+    DONE = "done"
 }
 
 export enum PaymentStatus {
@@ -16,12 +17,9 @@ export enum PaymentStatus {
 }
 
 const OrderItemSchema = new mongoose.Schema({
-    itemName: { type: String, required: true },
-    quantity: { type: Number, required: true, min: 1 },
-    price: { type: Number, required: true, min: 0 },
-    totalPrice: { type: Number, required: true, min: 0 },
-    category: { type: String, required: false },
-    notes: { type: String, required: false }
+    menuid: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Menu' },
+    notes: { type: String, required: false },
+    quantity: { type: Number, required: true, default: 1, min: 1 }, 
 });
 
 const OrderSchema = new mongoose.Schema({
@@ -51,9 +49,7 @@ const OrderSchema = new mongoose.Schema({
     employeeId: { type: String, required: false, ref: 'Employee' },
     employeeName: { type: String, required: false },
     orderDate: { type: Date, required: true, default: new Date() },
-    estimatedTime: { type: Number, required: false }, 
     completedAt: { type: Date, required: false },
-    notes: { type: String, required: false }
 }, { timestamps: true });
 
 OrderSchema.index({ tableid: 1 });
