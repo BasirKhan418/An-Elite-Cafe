@@ -4,21 +4,34 @@ import { headers } from "next/headers";
 import { OrderSchema } from "../../../../../validation/order/order";
 import { createOrder,updateOrder } from "../../../../../repository/order/order";
 import { changeTableStatus } from "../../../../../repository/tables/changestatus";
+import { getAllOrders ,getOrderbyDate,getOrderbyStatus,getOrderbyDateAndStatus} from "../../../../../repository/order/order";
 export async function GET(request: NextRequest) {
     try {
         const reqHeaders = await headers();
         const authHeader = reqHeaders.get("Authorization");
-        
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
-        }
-        
-        const token = authHeader.substring(7); 
-        const result = await verifyAdminToken(token);
+        const result = await verifyAdminToken(authHeader || "");
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
-        
+        const url = new URL(request.url);
+        const searchParams = url.searchParams;
+        const date = searchParams.get("date");
+        const status = searchParams.get("status");
+        if(date&&!status){
+            const res = await getOrderbyDate(date);
+            return NextResponse.json(res, { status: res.success ? 200 : 500 });
+        }
+        else if(!date&&status){
+            const res = await getOrderbyStatus(status);
+            return NextResponse.json(res, { status: res.success ? 200 : 500 });
+        }
+        else if(date&&status){
+            const res = await getOrderbyDateAndStatus(date, status);
+            return NextResponse.json(res, { status: res.success ? 200 : 500 });
+        }
+      //get all
+        const res = await getAllOrders();
+        return NextResponse.json(res, { status: res.success ? 200 : 500 });
 
     }
     catch (error) {
