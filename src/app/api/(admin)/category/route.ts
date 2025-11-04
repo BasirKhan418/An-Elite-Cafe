@@ -7,8 +7,14 @@ import { getAllCategories,createCategory, updateCategory, deleteCategory } from 
 export async function GET(request: NextRequest) {
     try {
         const reqHeaders = await headers();
-        const token = reqHeaders.get("Authorization");
-        const result = await verifyAdminToken(token || "");
+        const authHeader = reqHeaders.get("Authorization");
+        
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
+        }
+        
+        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
@@ -23,8 +29,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const reqHeaders = await headers();
-        const token = reqHeaders.get("Authorization");
-        const result = await verifyAdminToken(token || "");
+        const authHeader = reqHeaders.get("Authorization");
+        
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
+        }
+        
+        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
@@ -44,8 +56,14 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
     try {
         const reqHeaders = await headers();
-        const token = reqHeaders.get("Authorization");
-        const result = await verifyAdminToken(token || "");
+        const authHeader = reqHeaders.get("Authorization");
+        
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
+        }
+        
+        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
@@ -65,8 +83,14 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     try {
         const reqHeaders = await headers();
-        const token = reqHeaders.get("Authorization");
-        const result = await verifyAdminToken(token || "");
+        const authHeader = reqHeaders.get("Authorization");
+        
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
+        }
+        
+        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }

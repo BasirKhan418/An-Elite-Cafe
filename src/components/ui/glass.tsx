@@ -100,13 +100,21 @@ interface GlassModalProps {
   onClose: () => void
   title: string
   children: React.ReactNode
+  size?: "sm" | "md" | "lg" | "xl"
 }
 
-const GlassModal: React.FC<GlassModalProps> = ({ isOpen, onClose, title, children }) => {
+const GlassModal: React.FC<GlassModalProps> = ({ isOpen, onClose, title, children, size = "md" }) => {
   if (!isOpen) return null
 
+  const sizeClasses = {
+    sm: "max-w-md",
+    md: "max-w-lg",
+    lg: "max-w-2xl",
+    xl: "max-w-4xl"
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
@@ -114,9 +122,9 @@ const GlassModal: React.FC<GlassModalProps> = ({ isOpen, onClose, title, childre
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-md mx-4">
-        <GlassCard className="p-6">
-          <div className="flex justify-between items-center mb-4">
+      <div className={cn("relative w-full", sizeClasses[size])}>
+        <GlassCard className="p-6 max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/90 backdrop-blur-md -mt-6 -mx-6 px-6 py-4 border-b border-gray-200/50 z-10">
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
@@ -127,7 +135,9 @@ const GlassModal: React.FC<GlassModalProps> = ({ isOpen, onClose, title, childre
               </svg>
             </button>
           </div>
-          {children}
+          <div className="pt-2">
+            {children}
+          </div>
         </GlassCard>
       </div>
     </div>

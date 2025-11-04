@@ -15,7 +15,9 @@ import {
   X, 
   Bell, 
   LogOut,
-  User
+  User,
+  FolderOpen,
+  UtensilsCrossed
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -30,6 +32,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
     { id: 'tables', label: 'Table Management', icon: Utensils, href: '/admin/tables' },
+    { id: 'categories', label: 'Categories', icon: FolderOpen, href: '/admin/categories' },
+    { id: 'menu', label: 'Menu Items', icon: UtensilsCrossed, href: '/admin/menu' },
     { id: 'employees', label: 'Employee Management', icon: Users, href: '/admin/employees' },
     { id: 'orders', label: 'Order Status', icon: ClipboardList, href: '/admin/orders' },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, href: '/admin/analytics' },
