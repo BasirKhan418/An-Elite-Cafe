@@ -144,4 +144,15 @@ export class AdminAPI {
     })
     return response.json()
   }
+
+  // Dashboard API
+  static async getDashboardStats(date?: string) {
+    const queryParams = new URLSearchParams()
+    if (date) queryParams.append('date', date)
+
+    const response = await fetch(`/api/dashboard/stats?${queryParams}`, {
+      headers: this.getAuthHeaders()
+    })
+    return response.json()
+  }
 }
