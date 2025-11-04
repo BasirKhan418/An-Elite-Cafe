@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         
-        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const token = authHeader.substring(7); 
         const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         
-        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const token = authHeader.substring(7); 
         const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         
-        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const token = authHeader.substring(7); 
         const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
@@ -89,7 +89,7 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
         }
         
-        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const token = authHeader.substring(7); 
         const result = await verifyAdminToken(token);
         if (!result.success) {
             return NextResponse.json({ error: "Unauthorized Access", success: false, message: "Invalid token" }, { status: 401 });
