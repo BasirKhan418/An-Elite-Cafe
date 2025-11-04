@@ -1,63 +1,94 @@
 import ConnectDb from "../../middleware/connectdb";
 import Coupon from "../../models/Coupon";
 import Order from "../../models/Order";
-
+import Table from "../../models/Table";
 export const createBill = async (orderId: string, data: any) => {
-  try {
-    await ConnectDb();
-    const { coupon = [], taxpercentage = 0 } = data;
+    try {
+        await ConnectDb();
+        const { coupon = [], taxpercentage = 0 } = data;
 
-    const order = await Order.findOne({ orderid: orderId });
-    if (!order) {
-      return { success: false, message: "Order not found" };
-    }
+        const order = await Order.findOne({ orderid: orderId });
+        if (!order) {
+            return { success: false, message: "Order not found" };
+        }
 
-    let totalAmount = order.totalAmount;
-    let discountPercentage = 0;
+        let totalAmount = order.totalAmount;
+        let discountPercentage = 0;
 
-    if (Array.isArray(coupon) && coupon.length > 0) {
-      await Promise.all(
-        coupon.map(async (item: string) => {
-          const couponData = await Coupon.findOne({ couponcode: item }); // correct key
-          if (couponData) {
-            if (couponData.totalUsageLimit > 0) {
-              await Coupon.updateOne(
-                { couponcode: item },
-                { $inc: { totalUsageLimit: -1 } }
-              );
-              discountPercentage += couponData.discountPercentage;
+        if (Array.isArray(coupon) && coupon.length > 0) {
+            await Promise.all(
+                coupon.map(async (item: string) => {
+                    const couponData = await Coupon.findOne({ couponcode: item }); // correct key
+                    if (couponData) {
+                        if (couponData.totalUsageLimit > 0) {
+                            await Coupon.updateOne(
+                                { couponcode: item },
+                                { $inc: { totalUsageLimit: -1 } }
+                            );
+                            discountPercentage += couponData.discountPercentage;
+                        }
+                    }
+                })
+            );
+        }
+
+        const discountAmount = (totalAmount * discountPercentage) / 100;
+        totalAmount -= discountAmount;
+
+
+        const taxAmount = (taxpercentage / 100) * totalAmount;
+        totalAmount += taxAmount;
+
+        totalAmount = Math.ceil(totalAmount < 0 ? 0 : totalAmount);
+
+        await Order.updateOne(
+            { orderid: orderId },
+            {
+                totalAmount,
+                tax: taxpercentage,
+                discount: discountPercentage,
             }
-          }
-        })
-      );
+        );
+
+        return {
+            success: true,
+            totalAmount,
+            totalTax: taxpercentage,
+            totalDiscount: discountPercentage,
+            message: "Bill created successfully",
+        };
+    } catch (error) {
+        return { success: false, error, message: "Failed to create bill" };
     }
-
-    const discountAmount = (totalAmount * discountPercentage) / 100;
-    totalAmount -= discountAmount;
-
-
-    const taxAmount = (taxpercentage / 100) * totalAmount;
-    totalAmount += taxAmount;
-
-    totalAmount = Math.ceil(totalAmount < 0 ? 0 : totalAmount);
-
-    await Order.updateOne(
-      { orderid: orderId },
-      {
-        totalAmount,
-        tax: taxpercentage,
-        discount: discountPercentage,
-      }
-    );
-
-    return {
-      success: true,
-      totalAmount,
-      totalTax: taxpercentage,
-      totalDiscount: discountPercentage,
-      message: "Bill created successfully",
-    };
-  } catch (error) {
-    return { success: false, error, message: "Failed to create bill" };
-  }
 };
+
+
+
+export const MarkOrderAsDone = async (orderId: string, data: any) => {
+    try {
+        await ConnectDb();
+        const { paymentmode } = data;
+        const order = await Order.findOneAndUpdate(
+            { orderid: orderId },
+            {
+                status: "done",
+                paymentMethod: paymentmode,
+                paymentStatus: "paid",
+            },
+            { new: true }
+        );
+        if (!order) {
+            return { success: false, message: "Order not found" };
+        }
+        await Table.updateOne(
+            { tableid: order.tableid },
+            { status: "available" }
+        );
+
+        return { success: true, order, message: "Order marked as done successfully" };
+
+    }
+    catch (error) {
+        return { success: false, error, message: "Failed to mark order as done" };
+    }
+}
