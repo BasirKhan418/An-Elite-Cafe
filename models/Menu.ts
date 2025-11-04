@@ -35,4 +35,4 @@ const MenuSchema = new mongoose.Schema(
 
 MenuSchema.index({ name: 1, category: 1 });
 
-export default mongoose.models.Menu || mongoose.model("Menu", MenuSchema);
+export default mongoose.models?.Menu || mongoose.model("Menu", MenuSchema);

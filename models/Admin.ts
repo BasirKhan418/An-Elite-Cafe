@@ -47,4 +47,4 @@ AdminSchema.index({ email: 1 });
 AdminSchema.index({ username: 1 });
 AdminSchema.index({ role: 1 });
 
-export default mongoose.models.Admin || mongoose.model('Admin', AdminSchema);
+export default mongoose.models?.Admin || mongoose.model('Admin', AdminSchema);

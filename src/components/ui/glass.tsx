@@ -123,8 +123,8 @@ const GlassModal: React.FC<GlassModalProps> = ({ isOpen, onClose, title, childre
       
       {/* Modal */}
       <div className={cn("relative w-full", sizeClasses[size])}>
-        <GlassCard className="p-6 max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-between items-center mb-4 sticky top-0 bg-white/90 backdrop-blur-md -mt-6 -mx-6 px-6 py-4 border-b border-gray-200/50 z-10">
+        <GlassCard className="p-0 max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-gray-200/50 z-10">
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
@@ -135,7 +135,7 @@ const GlassModal: React.FC<GlassModalProps> = ({ isOpen, onClose, title, childre
               </svg>
             </button>
           </div>
-          <div className="pt-2">
+          <div className="p-6">
             {children}
           </div>
         </GlassCard>

@@ -17,7 +17,11 @@ import {
   LogOut,
   User,
   FolderOpen,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Package,
+  ChevronDown,
+  ShoppingCart,
+  ChefHat
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -25,15 +29,34 @@ interface AdminLayoutProps {
   currentPage: string
 }
 
+interface NavItem {
+  id: string
+  label: string
+  icon: any
+  href?: string
+  submenu?: Array<{ id: string; label: string; href: string }>
+}
+
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [expandedMenu, setExpandedMenu] = useState<string | null>('inventory')
   const { adminData, logout } = useAdminAuth()
 
-  const navigationItems = [
+  const navigationItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
     { id: 'tables', label: 'Table Management', icon: Utensils, href: '/admin/tables' },
     { id: 'categories', label: 'Categories', icon: FolderOpen, href: '/admin/categories' },
     { id: 'menu', label: 'Menu Items', icon: UtensilsCrossed, href: '/admin/menu' },
+    { 
+      id: 'inventory', 
+      label: 'Inventory', 
+      icon: Package, 
+      submenu: [
+        { id: 'inventory-dashboard', label: 'Dashboard', href: '/admin/inventory' },
+        { id: 'inventory-stock', label: 'Stock Management', href: '/admin/inventory/stock' },
+        { id: 'inventory-recipes', label: 'Recipes', href: '/admin/inventory/recipes' }
+      ]
+    },
     { id: 'employees', label: 'Employee Management', icon: Users, href: '/admin/employees' },
     { id: 'orders', label: 'Order Status', icon: ClipboardList, href: '/admin/orders' },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, href: '/admin/analytics' },
@@ -44,6 +67,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout()
     }
+  }
+
+  const isCurrentPageActive = (item: NavItem) => {
+    if (item.submenu) {
+      return item.submenu.some(sub => currentPage === sub.id)
+    }
+    return currentPage === item.id
   }
 
   return (
@@ -99,27 +129,92 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
               <div className={cn("space-y-1", sidebarOpen ? "px-3" : "px-2")}>
                 {navigationItems.map((item) => {
                   const IconComponent = item.icon
-                  const isActive = currentPage === item.id
+                  const isActive = isCurrentPageActive(item)
+                  const hasSubmenu = !!item.submenu
+                  const isExpanded = expandedMenu === item.id
+
                   return (
                     <div key={item.id} className="relative group">
-                      <a
-                        href={item.href}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden",
-                          sidebarOpen ? "justify-start" : "justify-center",
-                          isActive
-                            ? "bg-gray-900 text-white shadow-md"
-                            : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                        )}
-                      >
-                        <IconComponent className={cn(
-                          "w-5 h-5 flex-shrink-0",
-                          isActive ? "text-white" : "text-gray-600"
-                        )} />
-                        {sidebarOpen && (
-                          <span className="font-medium text-sm">{item.label}</span>
-                        )}
-                      </a>
+                      {hasSubmenu ? (
+                        <>
+                          <button
+                            onClick={() => setExpandedMenu(isExpanded ? null : item.id)}
+                            className={cn(
+                              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden",
+                              sidebarOpen ? "justify-between" : "justify-center",
+                              isActive
+                                ? "bg-gray-900 text-white shadow-md"
+                                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <IconComponent className={cn(
+                                "w-5 h-5 flex-shrink-0",
+                                isActive ? "text-white" : "text-gray-600"
+                              )} />
+                              {sidebarOpen && (
+                                <span className={cn("font-medium text-sm", isActive && "font-semibold")}>
+                                  {item.label}
+                                </span>
+                              )}
+                            </div>
+                            {sidebarOpen && (
+                              <ChevronDown className={cn(
+                                "w-4 h-4 transition-transform duration-200",
+                                isExpanded ? "rotate-180" : "",
+                                isActive ? "text-white" : "text-gray-600"
+                              )} />
+                            )}
+                          </button>
+
+                          {/* Submenu */}
+                          {sidebarOpen && isExpanded && (
+                            <div className="mt-1 ml-2 space-y-1 border-l-2 border-gray-200 pl-3 py-1">
+                              {item.submenu?.map((subitem) => {
+                                const isSubActive = currentPage === subitem.id
+                                return (
+                                  <a
+                                    key={subitem.id}
+                                    href={subitem.href}
+                                    className={cn(
+                                      "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                                      isSubActive
+                                        ? "bg-gray-900 text-white font-semibold"
+                                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                    )}
+                                  >
+                                    <div className={cn(
+                                      "w-1.5 h-1.5 rounded-full",
+                                      isSubActive ? "bg-white" : "bg-gray-400"
+                                    )} />
+                                    <span>{subitem.label}</span>
+                                  </a>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <a
+                          href={item.href}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden",
+                            sidebarOpen ? "justify-start" : "justify-center",
+                            isActive
+                              ? "bg-gray-900 text-white shadow-md"
+                              : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                          )}
+                        >
+                          <IconComponent className={cn(
+                            "w-5 h-5 flex-shrink-0",
+                            isActive ? "text-white" : "text-gray-600"
+                          )} />
+                          {sidebarOpen && (
+                            <span className="font-medium text-sm">{item.label}</span>
+                          )}
+                        </a>
+                      )}
+
                       {!sidebarOpen && (
                         <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
                           {item.label}
