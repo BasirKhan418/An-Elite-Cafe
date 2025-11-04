@@ -111,6 +111,48 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, isOpen, onClose, onB
   const calculateBillPreview = () => {
     if (!order) return { subtotal: 0, discount: 0, sgstAmount: 0, cgstAmount: 0, tax: 0, total: 0, discountPercentage: 0 }
 
+    // If the bill is already generated, show values based on the stored order fields
+    if (order.isgeneratedBill || billGenerated) {
+      const subtotal = order.subtotal || 0
+      const discountPercentage = order.discount || 0
+      const discountAmount = (subtotal * discountPercentage) / 100
+      const afterDiscount = subtotal - discountAmount
+
+      // Prefer stored SGST/CGST when available; otherwise split total tax evenly if provided
+      let sgstPct = order.sgst ?? sgst
+      let cgstPct = order.cgst ?? cgst
+
+      let sgstAmount = 0
+      let cgstAmount = 0
+
+      if (order.sgst !== undefined && order.cgst !== undefined) {
+        sgstAmount = (afterDiscount * sgstPct) / 100
+        cgstAmount = (afterDiscount * cgstPct) / 100
+      } else if (order.tax) {
+        const totalTaxAmt = (afterDiscount * order.tax) / 100
+        sgstAmount = totalTaxAmt / 2
+        cgstAmount = totalTaxAmt / 2
+      } else {
+        // Fallback to local percentages if nothing stored
+        sgstAmount = (afterDiscount * sgstPct) / 100
+        cgstAmount = (afterDiscount * cgstPct) / 100
+      }
+
+      const taxAmount = sgstAmount + cgstAmount
+      const total = order.totalAmount ?? Math.ceil(afterDiscount + taxAmount)
+
+      return {
+        subtotal,
+        discount: discountAmount,
+        sgstAmount,
+        cgstAmount,
+        tax: taxAmount,
+        total: total > 0 ? total : 0,
+        discountPercentage
+      }
+    }
+
+    // Otherwise, we're previewing before generation using selected coupons and current SGST/CGST inputs
     let subtotal = order.subtotal
     let discountPercentage = 0
 

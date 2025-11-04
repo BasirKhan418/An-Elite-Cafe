@@ -29,12 +29,18 @@ const dots = '........................................'
 
 const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst, cgst }) => {
   const calculateBill = () => {
+    // Prefer values from an already generated order to ensure the print matches the official bill
+    const effectiveDiscount = (order.isgeneratedBill ? (order.discount || 0) : discount) || 0
+    const effectiveSgst = order.sgst ?? sgst
+    const effectiveCgst = order.cgst ?? cgst
+
     const subtotal = order.subtotal
-    const discountAmount = (subtotal * discount) / 100
+    const discountAmount = (subtotal * effectiveDiscount) / 100
     const afterDiscount = subtotal - discountAmount
-    const sgstAmount = (afterDiscount * sgst) / 100
-    const cgstAmount = (afterDiscount * cgst) / 100
-    const total = Math.ceil(afterDiscount + sgstAmount + cgstAmount)
+    const sgstAmount = (afterDiscount * effectiveSgst) / 100
+    const cgstAmount = (afterDiscount * effectiveCgst) / 100
+    const computedTotal = Math.ceil(afterDiscount + sgstAmount + cgstAmount)
+    const total = order.isgeneratedBill && order.totalAmount ? order.totalAmount : computedTotal
 
     return {
       subtotal,
@@ -42,7 +48,10 @@ const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst
       afterDiscount,
       sgstAmount,
       cgstAmount,
-      total
+      total,
+      effectiveDiscount,
+      effectiveSgst,
+      effectiveCgst
     }
   }
 
@@ -170,10 +179,10 @@ const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst
             <span style={{ fontWeight: 700 }}>₹{bill.subtotal.toFixed(2)}</span>
           </div>
 
-          {discount > 0 && (
+          {bill.effectiveDiscount > 0 && (
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span>DISCOUNT ({discount}%):</span>
+                <span>DISCOUNT ({bill.effectiveDiscount}%):</span>
                 <span style={{ fontWeight: 700 }}>-₹{bill.discountAmount.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -184,12 +193,12 @@ const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst
           )}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span>SGST ({sgst}%):</span>
+            <span>SGST ({bill.effectiveSgst}%):</span>
             <span>₹{bill.sgstAmount.toFixed(2)}</span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span>CGST ({cgst}%):</span>
+            <span>CGST ({bill.effectiveCgst}%):</span>
             <span>₹{bill.cgstAmount.toFixed(2)}</span>
           </div>
 
