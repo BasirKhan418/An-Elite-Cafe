@@ -46,7 +46,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
   const { adminData, logout } = useAdminAuth()
 
-  // Check if user is super admin (case-insensitive check)
   const isSuperAdmin = adminData?.role?.toLowerCase() === 'super_admin'
 
   const navigationItems: NavItem[] = [
@@ -80,7 +79,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
     { id: 'settings', label: 'Settings', icon: Settings, href: '/admin/settings' },
   ]
 
-  // Auto-expand menu if current page belongs to a submenu
   useEffect(() => {
     const activeMenuItem = navigationItems.find(item => {
       if (item.submenu) {

@@ -142,3 +142,14 @@
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+/* Dot pattern background */
+.bg-dot-thick-neutral-800 {
+  background-image: radial-gradient(circle, rgb(38 38 38 / 0.6) 2px, transparent 2px);
+  background-size: 40px 40px;
+}
+
+.bg-dot-thick-amber-500 {
+  background-image: radial-gradient(circle, rgb(245 158 11 / 0.8) 2px, transparent 2px);
+  background-size: 40px 40px;
+}
