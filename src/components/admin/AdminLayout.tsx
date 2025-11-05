@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { GlassCard, GlassButton } from '@/components/ui/glass'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import { useAdminAuth } from './AdminAuthProvider'
 import { 
   LayoutDashboard, 
@@ -136,9 +137,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
             )}>
               {sidebarOpen ? (
                 <>
-                  <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
-                    AC
-                  </div>
+                 <Image
+                    src="/logo.png"
+                    alt="An Elite Cafe Logo"
+                    width={40}
+                    height={40}
+                    />
                   <div className="flex-1 min-w-0">
                     <h1 className="text-sm font-bold text-gray-900 truncate">An Elite Cafe</h1>
                     <p className="text-xs text-gray-500">Admin Dashboard</p>

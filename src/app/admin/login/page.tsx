@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { GlassCard, GlassInput, GlassButton } from '@/components/ui/glass'
 import { ShieldCheck, Coffee, Lock, Mail, Eye, EyeOff } from 'lucide-react'
+import Image from 'next/image';
 
 const AdminLogin: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -72,12 +73,14 @@ const AdminLogin: React.FC = () => {
           {/* Logo and Header */}
           <div className="text-center mb-10">
             <div className="relative inline-block mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl flex items-center justify-center shadow-lg shadow-gray-900/30 transform hover:scale-105 transition-transform duration-300">
-                <span className="text-white font-bold text-3xl">AC</span>
-              </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
-                <ShieldCheck className="w-5 h-5 text-gray-900" />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="An Elite Cafe Logo"
+                width={200}
+                height={200}
+                className="mx-auto -mb-10"
+                priority
+              />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
               Admin Portal
