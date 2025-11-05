@@ -117,6 +117,33 @@ export class AdminAPI {
     return response.json()
   }
 
+  static async createCoupon(couponData: any) {
+    const response = await fetch('/api/coupon', {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(couponData)
+    })
+    return response.json()
+  }
+
+  static async updateCoupon(couponData: any) {
+    const response = await fetch('/api/coupon', {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(couponData)
+    })
+    return response.json()
+  }
+
+  static async deleteCoupon(id: string) {
+    const response = await fetch('/api/coupon', {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ id })
+    })
+    return response.json()
+  }
+
   static async validateCoupon(couponcode: string) {
     const response = await fetch('/api/coupon/validate', {
       method: 'POST',

@@ -22,7 +22,8 @@ import {
   ChevronDown,
   ShoppingCart,
   ChefHat,
-  Shield
+  Shield,
+  TicketPercent
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -52,6 +53,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
     { id: 'tables', label: 'Table Management', icon: Utensils, href: '/admin/tables' },
     { id: 'categories', label: 'Categories', icon: FolderOpen, href: '/admin/categories' },
     { id: 'menu', label: 'Menu Items', icon: UtensilsCrossed, href: '/admin/menu' },
+    { id: 'coupons', label: 'Coupons', icon: TicketPercent, href: '/admin/coupons' },
     { 
       id: 'inventory', 
       label: 'Inventory', 
