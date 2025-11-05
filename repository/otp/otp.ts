@@ -21,7 +21,11 @@ export const createOTPEntry=async (email:string)=>{
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         // use ioredis-style arguments for EX to satisfy typings
         await redisClient.set(email, otp, "EX", 300); // OTP valid for 5 minutes
-        const data = sendOtpEmail(checkuser.name, email, otp);
+        const data = await sendOtpEmail(checkuser.name, email, otp);
+        if(data.success===false){
+            return {success:false,message:"Failed to send OTP email, we are experiencing smtp issues",error:data.error};
+        }
+
         return { message: "OTP sent successfully", success: true,  };
     }
     catch (error) {
