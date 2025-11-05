@@ -21,8 +21,11 @@ import {
   Package,
   ChevronDown,
   ShoppingCart,
-  ChefHat
+  ChefHat,
+  Shield,
+  TicketPercent
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -42,11 +45,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
   const { adminData, logout } = useAdminAuth()
 
+  // Check if user is super admin (case-insensitive check)
+  const isSuperAdmin = adminData?.role?.toLowerCase() === 'super_admin'
+
   const navigationItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
     { id: 'tables', label: 'Table Management', icon: Utensils, href: '/admin/tables' },
     { id: 'categories', label: 'Categories', icon: FolderOpen, href: '/admin/categories' },
     { id: 'menu', label: 'Menu Items', icon: UtensilsCrossed, href: '/admin/menu' },
+    { id: 'coupons', label: 'Coupons', icon: TicketPercent, href: '/admin/coupons' },
     { 
       id: 'inventory', 
       label: 'Inventory', 
@@ -68,6 +75,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
       ]
     },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, href: '/admin/analytics' },
+    ...(isSuperAdmin ? [{ id: 'admins', label: 'Admin Management', icon: Shield, href: '/admin/admins' }] : []),
     { id: 'settings', label: 'Settings', icon: Settings, href: '/admin/settings' },
   ]
 
@@ -86,9 +94,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   }, [currentPage])
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      logout()
-    }
+    toast.warning('Logout?', {
+      description: "You will be signed out of your admin session.",
+      action: {
+        label: "Logout",
+        onClick: () => logout()
+      }
+    })
   }
 
   const isCurrentPageActive = (item: NavItem) => {

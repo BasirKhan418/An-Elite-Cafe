@@ -102,3 +102,35 @@ export const requireRole = (
         return handler(request, admin);
     });
 };
+
+export const verifyAdminAuth = async (request: NextRequest): Promise<{ success: boolean; message?: string; admin?: any }> => {
+    try {
+        const authHeader = request.headers.get("authorization");
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return { 
+                success: false, 
+                message: "Unauthorized: No token provided" 
+            };
+        }
+
+        const token = authHeader.substring(7);
+        const decoded = verifyAdminToken(token);
+
+        if (!decoded) {
+            return { 
+                success: false, 
+                message: "Unauthorized: Invalid token" 
+            };
+        }
+
+        return { 
+            success: true, 
+            admin: decoded 
+        };
+    } catch (error) {
+        return { 
+            success: false, 
+            message: "Unauthorized: Token verification failed" 
+        };
+    }
+};

@@ -23,6 +23,7 @@ import {
 import OrderDetailsModal from '@/components/admin/OrderDetailsModal';
 import type { Order } from '@/types/order';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 const ACTIVE_STATUSES = {
   pending: { 
@@ -101,11 +102,11 @@ function ActiveOrdersContent() {
         await fetchOrders();
       } else {
         console.error('Update failed:', response.message);
-        alert(response.message || 'Failed to update order status');
+        toast.error(response.message || 'Failed to update order status');
       }
     } catch (error) {
       console.error('Error updating order status:', error);
-      alert('Failed to update order status');
+      toast.error('Failed to update order status');
     } finally {
       setUpdatingStatus(null);
     }

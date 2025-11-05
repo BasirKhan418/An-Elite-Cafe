@@ -117,6 +117,33 @@ export class AdminAPI {
     return response.json()
   }
 
+  static async createCoupon(couponData: any) {
+    const response = await fetch('/api/coupon', {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(couponData)
+    })
+    return response.json()
+  }
+
+  static async updateCoupon(couponData: any) {
+    const response = await fetch('/api/coupon', {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(couponData)
+    })
+    return response.json()
+  }
+
+  static async deleteCoupon(id: string) {
+    const response = await fetch('/api/coupon', {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ id })
+    })
+    return response.json()
+  }
+
   static async validateCoupon(couponcode: string) {
     const response = await fetch('/api/coupon/validate', {
       method: 'POST',
@@ -141,6 +168,34 @@ export class AdminAPI {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify({ orderid, paymentmode })
+    })
+    return response.json()
+  }
+
+  // Dashboard API
+  static async getDashboardStats(date?: string) {
+    const queryParams = new URLSearchParams()
+    if (date) queryParams.append('date', date)
+
+    const response = await fetch(`/api/dashboard/stats?${queryParams}`, {
+      headers: this.getAuthHeaders()
+    })
+    return response.json()
+  }
+
+  // Analytics API
+  static async getAnalytics(params?: { 
+    period?: 'day' | 'week' | 'month' | 'year';
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const queryParams = new URLSearchParams()
+    if (params?.period) queryParams.append('period', params.period)
+    if (params?.startDate) queryParams.append('startDate', params.startDate)
+    if (params?.endDate) queryParams.append('endDate', params.endDate)
+
+    const response = await fetch(`/api/dashboard/analytics?${queryParams}`, {
+      headers: this.getAuthHeaders()
     })
     return response.json()
   }

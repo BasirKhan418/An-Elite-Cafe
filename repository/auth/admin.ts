@@ -2,6 +2,8 @@ import ConnectDb from "../../middleware/connectdb";
 import Admin from "../../models/Admin";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import setConnectionRedis from "../../middleware/connectRedis";
+import { sendOtpEmail } from "../../email/SendOtp";
 
 export const createAdmin = async (adminData: any) => {
     try {
@@ -161,5 +163,299 @@ export const deleteAdmin = async (id: string) => {
         return { message: "Admin deleted successfully", success: true, data: admin };
     } catch (err) {
         return { message: "Internal Server Error", success: false, error: err };
+    }
+};
+
+export const sendAdminOTP = async (email: string, currentPassword: string) => {
+    try {
+        await ConnectDb();
+        
+        // Verify admin exists and password is correct
+        const admin = await Admin.findOne({ email: email, isActive: true });
+        
+        if (!admin) {
+            return { message: "Admin not found", success: false };
+        }
+
+        const isPasswordValid = await bcrypt.compare(currentPassword, admin.password);
+        
+        if (!isPasswordValid) {
+            return { message: "Invalid current password", success: false };
+        }
+
+        // Generate OTP
+        const redisClient = setConnectionRedis();
+        redisClient.connect(() => {
+            console.log("Connected to Redis successfully for Admin OTP");
+        });
+        redisClient.on("error", (err) => {
+            console.error("Redis connection error:", err);
+        });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpKey = `admin_otp_${email}`;
+        
+        // Store OTP in Redis with 5 minute expiry
+        await redisClient.set(otpKey, otp, "EX", 300);
+        
+        // Send OTP email
+        const emailResult = await sendOtpEmail(admin.name, email, otp);
+        
+        if (emailResult.success === false) {
+            return { 
+                success: false, 
+                message: "Failed to send OTP email, we are experiencing SMTP issues", 
+                error: emailResult.error 
+            };
+        }
+
+        return { message: "OTP sent successfully to your email", success: true };
+    } catch (error) {
+        console.error("Error sending admin OTP:", error);
+        return { message: "Internal Server Error", success: false, error };
+    }
+};
+
+export const verifyAdminOTP = async (email: string, otp: string) => {
+    try {
+        const redisClient = setConnectionRedis();
+        const otpKey = `admin_otp_${email}`;
+        
+        const storedOtp = await redisClient.get(otpKey);
+        
+        if (!storedOtp) {
+            return { message: "OTP expired or not found", success: false };
+        }
+        
+        if (storedOtp !== otp) {
+            return { message: "Invalid OTP", success: false };
+        }
+        
+        // Mark OTP as verified (store verification token)
+        const verifyKey = `admin_otp_verified_${email}`;
+        await redisClient.set(verifyKey, "verified", "EX", 600); // 10 minutes to change password
+        
+        return { message: "OTP verified successfully", success: true };
+    } catch (error) {
+        console.error("Error verifying admin OTP:", error);
+        return { message: "Internal Server Error", success: false, error };
+    }
+};
+
+export const changeAdminPassword = async (email: string, otp: string, newPassword: string) => {
+    try {
+        await ConnectDb();
+        
+        // Verify OTP one more time
+        const redisClient = setConnectionRedis();
+        const verifyKey = `admin_otp_verified_${email}`;
+        const otpKey = `admin_otp_${email}`;
+        
+        const isVerified = await redisClient.get(verifyKey);
+        const storedOtp = await redisClient.get(otpKey);
+        
+        if (!isVerified || storedOtp !== otp) {
+            return { message: "Invalid or expired OTP. Please request a new one.", success: false };
+        }
+        
+        // Find admin
+        const admin = await Admin.findOne({ email: email, isActive: true });
+        
+        if (!admin) {
+            return { message: "Admin not found", success: false };
+        }
+        
+        // Hash new password
+        const saltRounds = 12;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        
+        // Update password
+        admin.password = hashedPassword;
+        await admin.save();
+        
+        // Clean up Redis keys
+        await redisClient.del(otpKey);
+        await redisClient.del(verifyKey);
+        
+        return { message: "Password changed successfully", success: true };
+    } catch (error) {
+        console.error("Error changing admin password:", error);
+        return { message: "Internal Server Error", success: false, error };
+    }
+};
+
+// Super Admin Functions for Admin Management
+
+export const getAllAdminsForSuperAdmin = async () => {
+    try {
+        await ConnectDb();
+        
+        // Get all admins excluding super admins
+        const admins = await Admin.find({ 
+            role: { $ne: "super_admin" }
+        })
+            .select('-password -token')
+            .sort({ createdAt: -1 });
+        
+        return { 
+            message: "Admins fetched successfully", 
+            success: true, 
+            data: admins
+        };
+    } catch (err) {
+        return { message: "Internal Server Error", success: false, error: err };
+    }
+};
+
+export const createAdminBySuperAdmin = async (adminData: any, createdBy: string) => {
+    try {
+        await ConnectDb();
+        
+        // Check if email or username already exists
+        const existingAdmin = await Admin.findOne({
+            $or: [
+                { email: adminData.email },
+                { username: adminData.username }
+            ]
+        });
+
+        if (existingAdmin) {
+            const field = existingAdmin.email === adminData.email ? 'email' : 'username';
+            return { 
+                message: `Admin with this ${field} already exists`, 
+                success: false 
+            };
+        }
+        
+        const saltRounds = 12;
+        const hashedPassword = await bcrypt.hash(adminData.password, saltRounds);
+        
+        const admin = await Admin.create({
+            ...adminData,
+            password: hashedPassword,
+            role: "admin", // Force role to be admin
+            createdBy: createdBy
+        });
+
+        const { password, token, ...adminResponse } = admin.toObject();
+        
+        return { 
+            message: "Admin created successfully", 
+            success: true, 
+            data: adminResponse 
+        };
+    } catch (err: any) {
+        console.error("Error creating admin:", err);
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyPattern)[0];
+            return { 
+                message: `Admin with this ${field} already exists`, 
+                success: false 
+            };
+        }
+        return { 
+            message: "Internal Server Error", 
+            success: false, 
+            error: err 
+        };
+    }
+};
+
+export const updateAdminBySuperAdmin = async (id: string, updateData: any) => {
+    try {
+        await ConnectDb();
+        
+        // Prevent updating super admin
+        const targetAdmin = await Admin.findById(id);
+        if (!targetAdmin) {
+            return { message: "Admin not found", success: false };
+        }
+        
+        if (targetAdmin.role === "super_admin") {
+            return { 
+                message: "Cannot update super admin", 
+                success: false 
+            };
+        }
+        
+        // Check for duplicate email/username if they're being updated
+        if (updateData.email || updateData.username) {
+            const duplicateCheck = await Admin.findOne({
+                _id: { $ne: id },
+                $or: [
+                    updateData.email ? { email: updateData.email } : {},
+                    updateData.username ? { username: updateData.username } : {}
+                ].filter(obj => Object.keys(obj).length > 0)
+            });
+
+            if (duplicateCheck) {
+                const field = duplicateCheck.email === updateData.email ? 'email' : 'username';
+                return { 
+                    message: `Admin with this ${field} already exists`, 
+                    success: false 
+                };
+            }
+        }
+        
+        // Don't allow role or password changes through this function
+        delete updateData.role;
+        delete updateData.password;
+
+        const admin = await Admin.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true }
+        ).select('-password -token');
+        
+        return { 
+            message: "Admin updated successfully", 
+            success: true, 
+            data: admin 
+        };
+    } catch (err) {
+        console.error("Error updating admin:", err);
+        return { 
+            message: "Internal Server Error", 
+            success: false, 
+            error: err 
+        };
+    }
+};
+
+export const deleteAdminBySuperAdmin = async (id: string) => {
+    try {
+        await ConnectDb();
+        
+        // Prevent deleting super admin
+        const targetAdmin = await Admin.findById(id);
+        if (!targetAdmin) {
+            return { message: "Admin not found", success: false };
+        }
+        
+        if (targetAdmin.role === "super_admin") {
+            return { 
+                message: "Cannot delete super admin", 
+                success: false 
+            };
+        }
+        
+        const admin = await Admin.findByIdAndUpdate(
+            id, 
+            { isActive: false }, 
+            { new: true }
+        ).select('-password -token');
+        
+        return { 
+            message: "Admin deleted successfully", 
+            success: true, 
+            data: admin 
+        };
+    } catch (err) {
+        console.error("Error deleting admin:", err);
+        return { 
+            message: "Internal Server Error", 
+            success: false, 
+            error: err 
+        };
     }
 };

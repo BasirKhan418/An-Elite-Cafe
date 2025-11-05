@@ -40,7 +40,7 @@ const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>(
         ref={ref}
         className={cn(
           // Base styles
-          "backdrop-blur-md border rounded-lg font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
+          "backdrop-blur-md border rounded-lg font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2",
           // Size variants
           {
             "px-3 py-1.5 text-sm": size === "sm",
@@ -169,15 +169,17 @@ const GlassTable: React.FC<GlassTableProps> = ({ headers, data, onRowAction, act
             <tr key={rowIndex} className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors">
               {headers.map((header, colIndex) => {
                 // Skip the Actions column data rendering if it's the actions header
-                if (header === 'Actions' && actions) {
+                if (header === 'Actions' && (actions || row._actions)) {
+                  const rowActions = row._actions || actions
                   return (
                     <td key={colIndex} className="py-3 px-4">
                       <div className="flex gap-2 flex-wrap">
-                        {actions.map((action) => (
+                        {rowActions.map((action: any) => (
                           <GlassButton
                             key={action.key}
                             size="sm"
                             variant={action.variant || "secondary"}
+                            disabled={action.disabled}
                             onClick={() => onRowAction?.(row, action.key)}
                           >
                             {action.label}

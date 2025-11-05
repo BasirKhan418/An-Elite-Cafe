@@ -192,32 +192,39 @@ const MenuManagement: React.FC = () => {
   }
 
   const handleDeleteMenu = async (menu: Menu) => {
-    if (window.confirm(`Are you sure you want to delete ${menu.name}?`)) {
-      try {
-        const token = localStorage.getItem('adminToken')
-        
-        const response = await fetch('/api/menu', {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ menuid: menu.menuid })
-        })
+    toast.warning(`Delete ${menu.name}?`, {
+      description: "This action cannot be undone.",
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            const token = localStorage.getItem('adminToken')
+            
+            const response = await fetch('/api/menu', {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ menuid: menu.menuid })
+            })
 
-        const data = await response.json()
+            const data = await response.json()
 
-        if (data.success) {
-          setMenus(menus.filter(m => m._id !== menu._id))
-        } else {
-          console.error('Error deleting menu:', data.message)
-          toast.error(data.message || 'Error deleting menu')
+            if (data.success) {
+              setMenus(menus.filter(m => m._id !== menu._id))
+              toast.success(`${menu.name} deleted successfully`)
+            } else {
+              console.error('Error deleting menu:', data.message)
+              toast.error(data.message || 'Error deleting menu')
+            }
+          } catch (error) {
+            console.error('Error deleting menu:', error)
+            toast.error('Error deleting menu. Please try again.')
+          }
         }
-      } catch (error) {
-        console.error('Error deleting menu:', error)
-        toast.error('Error deleting menu. Please try again.')
       }
-    }
+    })
   }
 
   const validateForm = (): boolean => {
