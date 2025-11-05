@@ -21,7 +21,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}         
           port: 22
           script: |
-            cd /An-Elite-Cafe
+            cd /home/ubuntu/An-Elite-Cafe
             git pull origin main
             npm install
             npm run build
