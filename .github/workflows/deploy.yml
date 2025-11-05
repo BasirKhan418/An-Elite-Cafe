@@ -21,6 +21,15 @@ jobs:
           key: ${{ secrets.EC2_KEY }}         
           port: 22
           script: |
+           # Load Node.js environment (handles nvm or global install)
+            if [ -f ~/.nvm/nvm.sh ]; then
+              echo "Using nvm environment"
+              source ~/.nvm/nvm.sh
+              nvm use node
+            else
+              echo "Using system-wide Node.js"
+              export PATH=$PATH:/usr/local/bin:/usr/bin
+            fi
             cd /home/ubuntu/An-Elite-Cafe
             git pull origin main
             npm install
