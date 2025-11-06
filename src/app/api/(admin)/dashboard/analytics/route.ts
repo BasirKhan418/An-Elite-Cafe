@@ -1,3 +1,4 @@
+
 import { NextResponse, NextRequest } from "next/server";
 import { verifyAdminToken } from "../../../../../../utils/verify";
 import { headers } from "next/headers";
@@ -7,25 +8,36 @@ import StockTransaction from "../../../../../../models/StockTransaction";
 import InventoryItem from "../../../../../../models/InventoryItem";
 import Menu from "../../../../../../models/Menu";
 import Table from "../../../../../../models/Table";
-
+import Category from "../../../../../../models/Category";
+export function registerModels() {
+  // Access the models to ensure they are registered
+  void Category;
+  void Menu;
+  void Order;
+  void StockTransaction;
+  void InventoryItem;
+  void Table;
+}
 export async function GET(request: NextRequest) {
     try {
+        await ConnectDb();
+        registerModels();
         const reqHeaders = await headers();
         const authHeader = reqHeaders.get("Authorization");
         const result = await verifyAdminToken(authHeader || "");
-        
+
         if (!result.success) {
-            return NextResponse.json({ 
-                error: "Unauthorized Access", 
-                success: false, 
-                message: "Invalid token" 
+            return NextResponse.json({
+                error: "Unauthorized Access",
+                success: false,
+                message: "Invalid token"
             }, { status: 401 });
         }
 
-        await ConnectDb();
+        
 
         const url = new URL(request.url);
-        const period = url.searchParams.get("period") || "day"; 
+        const period = url.searchParams.get("period") || "day";
         const startDateParam = url.searchParams.get("startDate");
         const endDateParam = url.searchParams.get("endDate");
 
@@ -67,9 +79,22 @@ export async function GET(request: NextRequest) {
         }
 
         // Fetch orders for the period
-        const orders = await Order.find({
-            orderDate: { $gte: startDate, $lte: endDate }
-        }).populate('items.menuid').sort({ orderDate: 1 });
+   
+        // Fetch orders for the period
+   const orders = await Order.find({
+  orderDate: { $gte: startDate, $lte: endDate },
+})
+.populate({
+  path: "items.menuid",
+  populate: {
+    path: "category", // this is inside Menu model
+    model: "Category",
+  },
+})
+.sort({ orderDate: 1 });
+
+console.log('Fetched orders count:', orders[0]?.items|| 0);
+
 
         // Fetch stock transactions for the period
         const stockTransactions = await StockTransaction.find({
@@ -134,7 +159,7 @@ export async function GET(request: NextRequest) {
 
         // Top Selling Items Analysis
         const itemSales = new Map<string, { name: string; quantity: number; revenue: number; count: number }>();
-        
+
         orders.forEach(order => {
             order.items?.forEach((item: any) => {
                 const menuItem = item.menuid;
@@ -142,7 +167,7 @@ export async function GET(request: NextRequest) {
                     const key = menuItem._id.toString();
                     const existing = itemSales.get(key);
                     const itemRevenue = (menuItem.price || 0) * (item.quantity || 1);
-                    
+
                     if (existing) {
                         existing.quantity += item.quantity || 1;
                         existing.revenue += itemRevenue;
@@ -194,22 +219,22 @@ export async function GET(request: NextRequest) {
 
         // Category-wise Revenue Analysis
         const categoryRevenue = new Map<string, { name: string; revenue: number; orders: number }>();
-        
+
         for (const order of orders) {
             if (order.items) {
                 for (const item of order.items) {
                     const menuItem = item.menuid as any;
                     if (menuItem && menuItem.category) {
-                        const categoryId = typeof menuItem.category === 'object' 
-                            ? menuItem.category._id?.toString() 
+                        const categoryId = typeof menuItem.category === 'object'
+                            ? menuItem.category._id?.toString()
                             : menuItem.category.toString();
                         const categoryName = typeof menuItem.category === 'object'
                             ? menuItem.category.name || 'Unknown'
                             : 'Category';
-                        
+
                         const itemRevenue = (menuItem.price || 0) * (item.quantity || 1);
                         const existing = categoryRevenue.get(categoryId);
-                        
+
                         if (existing) {
                             existing.revenue += itemRevenue;
                             existing.orders += 1;
@@ -256,10 +281,10 @@ export async function GET(request: NextRequest) {
         const tableUtilization = Object.entries(tableOrders)
             .map(([tableNumber, data]) => {
                 const stats = data as { count: number; revenue: number };
-                return { 
-                    tableNumber, 
-                    count: stats.count, 
-                    revenue: stats.revenue 
+                return {
+                    tableNumber,
+                    count: stats.count,
+                    revenue: stats.revenue
                 };
             })
             .sort((a, b) => b.revenue - a.revenue);
@@ -276,8 +301,8 @@ export async function GET(request: NextRequest) {
         });
 
         const previousRevenue = previousOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-        const revenueGrowth = previousRevenue > 0 
-            ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 
+        const revenueGrowth = previousRevenue > 0
+            ? ((totalRevenue - previousRevenue) / previousRevenue) * 100
             : totalRevenue > 0 ? 100 : 0;
 
         const previousOrderCount = previousOrders.length;
@@ -406,7 +431,7 @@ export async function GET(request: NextRequest) {
 // Helper function to calculate daily revenue trend
 function calculateDailyTrend(orders: any[], startDate: Date, endDate: Date) {
     const dailyRevenue = new Map<string, { revenue: number; orders: number }>();
-    
+
     // Initialize all days in the period
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
