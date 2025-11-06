@@ -77,17 +77,13 @@ export async function GET(request: NextRequest) {
                     startDate.setHours(0, 0, 0, 0);
             }
         }
-
-        // Fetch orders for the period
-   
-        // Fetch orders for the period
    const orders = await Order.find({
   orderDate: { $gte: startDate, $lte: endDate },
 })
 .populate({
   path: "items.menuid",
   populate: {
-    path: "category", // this is inside Menu model
+    path: "category", 
     model: "Category",
   },
 })
