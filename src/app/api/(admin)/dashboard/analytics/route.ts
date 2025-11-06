@@ -431,7 +431,7 @@ function calculateDailyTrend(orders: any[], startDate: Date, endDate: Date) {
     // Initialize all days in the period
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
-        const dateKey = currentDate.toISOString().split('T')[0];
+        const dateKey = currentDate.toLocaleDateString("en-CA");
         dailyRevenue.set(dateKey, { revenue: 0, orders: 0 });
         currentDate.setDate(currentDate.getDate() + 1);
     }
