@@ -13,8 +13,9 @@ export const createOrder = async (data: any) => {
                 totalAmount += menuItem.price * (item.quantity || 1);
             }
         }
+        const orderDate = new Date().toISOString();
 
-        const orderData = { ...data, totalAmount, subtotal: totalAmount };
+        const orderData = { ...data, totalAmount, subtotal: totalAmount, orderDate };
         const order = new Order(orderData);
         await order.save();
 
@@ -40,7 +41,8 @@ export const updateOrder = async (orderid: string, data: any) => {
                     totalAmount += menuItem.price * (item.quantity || 1);
                 }
             }
-            orderData = { ...data, totalAmount, subtotal: totalAmount };
+            const orderDate = new Date().toISOString();
+            orderData = { ...data, totalAmount, subtotal: totalAmount, orderDate };
         }
 
         const updatedOrder = await Order.findOneAndUpdate(
