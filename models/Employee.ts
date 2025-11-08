@@ -6,7 +6,7 @@ const EmployeeSchema = new mongoose.Schema({
     role: { type: String, required: true },
     img: { type: String, required: false },
     token: { type: String, required: false },
-    empid:{ type: String, required: false,default:Date.now().toString() },
+    empid:{ type: String, required: false, default: () => `emp_${Math.random().toString(36).substr(2, 9)}`},
     resname:{ type: String, required: false  ,default:"An Elite Cafe" },
     joinDate:{ type: Date, required: false , default: new Date() },
     shift:{ type: String, required: false  ,default:"Morning Shift (9 AM - 5 PM)" },
