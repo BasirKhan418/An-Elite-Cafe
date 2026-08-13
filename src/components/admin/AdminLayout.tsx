@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import { GlassCard, GlassButton } from '@/components/ui/glass'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 import { useAdminAuth } from './AdminAuthProvider'
 import { 
   LayoutDashboard, 
@@ -12,7 +11,6 @@ import {
   ClipboardList, 
   TrendingUp, 
   Settings, 
-  Menu, 
   X, 
   Bell, 
   LogOut,
@@ -135,13 +133,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
             )}>
               {sidebarOpen ? (
                 <>
-                 <Image
-                    src="/logo.png"
+                  <img
+                    src="/logo.png?v=ccc"
                     alt="CCC - Centurion Coffee Connect"
-                    width={40}
-                    height={40}
-                    className="rounded-md object-contain bg-white"
-                    />
+                    width={56}
+                    height={56}
+                    className="h-14 w-14 flex-shrink-0 rounded-md object-contain bg-white border border-gray-200"
+                  />
                   <div className="flex-1 min-w-0">
                     <h1 className="text-sm font-bold text-gray-900 truncate">CCC</h1>
                     <p className="text-xs text-gray-500 truncate">Centurion Coffee Connect</p>
@@ -157,10 +155,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
               ) : (
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="w-10 h-10 bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg flex items-center justify-center text-white font-bold shadow-sm hover:shadow-md transition-shadow"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
                   aria-label="Expand sidebar"
                 >
-                  <Menu className="w-5 h-5" />
+                  <img
+                    src="/logo.png?v=ccc"
+                    alt="CCC"
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 object-contain bg-white rounded-md border border-gray-200"
+                  />
                 </button>
               )}
             </div>
