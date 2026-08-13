@@ -467,7 +467,7 @@ const EmployeeManagement: React.FC = () => {
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
-            placeholder="e.g., john@elitecafe.com"
+            placeholder="e.g., john@ccc.com"
             error={errors.email}
           />
 

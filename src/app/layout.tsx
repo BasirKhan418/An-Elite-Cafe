@@ -13,8 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "An Elite Cafe - Management System",
-  description: "Professional restaurant management system for An Elite Cafe - 2025",
+  title: "CCC - Centurion Coffee Connect",
+  description: "Professional restaurant management system for CCC (Centurion Coffee Connect)",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

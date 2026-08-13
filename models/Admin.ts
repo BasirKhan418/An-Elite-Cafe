@@ -39,7 +39,7 @@ const AdminSchema = new mongoose.Schema({
     isActive: { type: Boolean, required: false, default: true },
     lastLogin: { type: Date, required: false },
     createdBy: { type: String, required: false },
-    resname: { type: String, required: false, default: "An Elite Cafe" },
+    resname: { type: String, required: false, default: "Centurion Coffee Connect" },
     joinDate: { type: Date, required: false, default: new Date() },
 }, { timestamps: true });
 

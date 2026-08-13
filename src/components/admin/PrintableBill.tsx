@@ -77,7 +77,9 @@ const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst
       >
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 6 }}>
-          <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>AN ELITE CAFÉ</div>
+          <img src="/logo.png" alt="CCC" style={{ width: 72, height: 72, margin: '0 auto 4px', display: 'block', objectFit: 'contain' }} />
+          <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>CCC</div>
+          <div style={{ fontSize: 10, marginTop: 2, letterSpacing: 0.5 }}>CENTURION COFFEE CONNECT</div>
           <div style={{ fontSize: 11, marginTop: 2 }}>TAX INVOICE</div>
         </div>
 
@@ -234,7 +236,7 @@ const PrintableBill: React.FC<PrintableBillProps> = ({ order, discount = 0, sgst
         {/* Footer */}
         <div style={{ textAlign: 'center', marginTop: 8 }}>
           <div style={{ fontWeight: 700, fontSize: 12 }}>THANK YOU FOR DINING WITH US!</div>
-          <div style={{ fontSize: 11, marginTop: 4 }}>AN ELITE CAFE</div>
+          <div style={{ fontSize: 11, marginTop: 4 }}>CCC — CENTURION COFFEE CONNECT</div>
           <div style={{ fontSize: 11, marginTop: 2 }}>VISIT AGAIN!</div>
         </div>
       </div>

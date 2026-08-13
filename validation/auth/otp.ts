@@ -26,7 +26,7 @@ export const EmployeeZodSchema = z.object({
   img: z.string().url("Invalid image URL").optional(),
   token: z.string().optional(),
   empid: z.string().optional().default(() => Date.now().toString()),
-  resname: z.string().optional().default("An Elite Cafe"),
+  resname: z.string().optional().default("Centurion Coffee Connect"),
   joinDate: z.string().optional().default(() => new Date().toISOString()),
   shift: z.string().optional().default("Morning Shift (9 AM - 5 PM)"),
 });

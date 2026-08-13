@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "send-email": "node --env-file=.env scripts/send-email.mjs",
+    "redis:ping": "node --env-file=.env scripts/test-redis.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",

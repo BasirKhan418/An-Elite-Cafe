@@ -336,7 +336,7 @@ const AdminSettings: React.FC = () => {
                     <div className="space-y-2">
                       <label className="text-sm text-gray-600 font-medium">Restaurant Name</label>
                       <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-gray-900 font-medium">{adminData?.resname || 'An Elite Cafe'}</p>
+                        <p className="text-gray-900 font-medium">{adminData?.resname || 'Centurion Coffee Connect'}</p>
                       </div>
                     </div>
                     <div className="space-y-2">

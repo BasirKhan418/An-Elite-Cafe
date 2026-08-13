@@ -137,13 +137,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
                 <>
                  <Image
                     src="/logo.png"
-                    alt="An Elite Cafe Logo"
+                    alt="CCC - Centurion Coffee Connect"
                     width={40}
                     height={40}
+                    className="rounded-md object-contain bg-white"
                     />
                   <div className="flex-1 min-w-0">
-                    <h1 className="text-sm font-bold text-gray-900 truncate">An Elite Cafe</h1>
-                    <p className="text-xs text-gray-500">Admin Dashboard</p>
+                    <h1 className="text-sm font-bold text-gray-900 truncate">CCC</h1>
+                    <p className="text-xs text-gray-500 truncate">Centurion Coffee Connect</p>
                   </div>
                   <button
                     onClick={() => setSidebarOpen(false)}
@@ -279,7 +280,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
                       {adminData?.name || 'Super Admin'}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {adminData?.email || 'admin@elitecafe.com'}
+                      {adminData?.email || 'admin@ccc.com'}
                     </p>
                   </div>
                 </div>
@@ -293,7 +294,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
                       {adminData?.name || 'Super Admin'}
                     </p>
                     <p className="text-xs text-gray-300 truncate">
-                      {adminData?.email || 'admin@elitecafe.com'}
+                      {adminData?.email || 'admin@ccc.com'}
                     </p>
                     <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
                   </div>

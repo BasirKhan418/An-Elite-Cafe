@@ -75,17 +75,17 @@ const AdminLogin: React.FC = () => {
             <div className="relative inline-block mb-6">
               <Image
                 src="/logo.png"
-                alt="An Elite Cafe Logo"
-                width={200}
-                height={200}
-                className="mx-auto -mb-10"
+                alt="CCC - Centurion Coffee Connect"
+                width={160}
+                height={160}
+                className="mx-auto object-contain bg-white rounded-xl"
                 priority
               />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-              Admin Portal
+              CCC
             </h1>
-            <p className="text-gray-600 font-medium">An Elite Cafe - Management System</p>
+            <p className="text-gray-600 font-medium">Centurion Coffee Connect — Admin Portal</p>
           </div>
 
           {/* Login Form */}
@@ -110,7 +110,7 @@ const AdminLogin: React.FC = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                placeholder="admin@elitecafe.com"
+                placeholder="admin@ccc.com"
                 required
                 className="w-full px-4 py-3.5 bg-white/80 backdrop-blur-sm border border-gray-300/50 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/20 focus:border-gray-900/30 transition-all duration-300 hover:bg-white/90"
               />
@@ -176,7 +176,7 @@ const AdminLogin: React.FC = () => {
         {/* Footer */}
         <div className="mt-6 text-center">
           <p className="text-gray-500 text-sm font-medium">
-            © 2025 An Elite Cafe. All rights reserved.
+            © {new Date().getFullYear()} CCC — Centurion Coffee Connect. All rights reserved.
           </p>
         </div>
       </div>

@@ -160,7 +160,7 @@ const AdminAnalytics: React.FC = () => {
     if (!analytics) return
 
     const csvData = [
-      ['An Elite Cafe - Analytics Report'],
+      ['CCC - Centurion Coffee Connect Analytics Report'],
       [`Period: ${formatDate(analytics.period.startDate)} to ${formatDate(analytics.period.endDate)}`],
       [''],
       ['Financial Summary'],

@@ -6,9 +6,9 @@ try{
     return { message: "Email transporter not configured", success: false };
  }
  const info = await transporter.sendMail({
-      from: `Elite Cafe `,
+      from: `CCC — Centurion Coffee Connect`,
       to: `${email}`,
-      subject: `Your Elite Cafe Verification Code`,
+      subject: `Your CCC Verification Code`,
       text: `Hello ${name},\n\nYour One-Time Password (OTP) is: ${otp}\n\nThis code will expire in 5 minutes.\n\nIf you didn’t request this, please ignore this email.`,
       html: `
 <!DOCTYPE html>
@@ -16,7 +16,7 @@ try{
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>GT-Tech Verification Code</title>
+<title>CCC Verification Code</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Inter',Arial,Helvetica,sans-serif;">
 
@@ -29,7 +29,7 @@ try{
         <!-- Header -->
         <tr>
           <td style="background-color:#1f2937;padding:24px;text-align:center;">
-            <img src="https://www.devsomeware.com/logo.png" alt="dsw Logo" style="max-width:140px;height:auto;">
+            <img src="${process.env.NEXT_PUBLIC_URL || ""}/logo.png" alt="CCC - Centurion Coffee Connect" style="max-width:140px;height:auto;">
           </td>
         </tr>
 
@@ -66,7 +66,7 @@ try{
         <tr>
           <td style="background-color:#f9fafb;padding:20px;text-align:center;color:#9ca3af;font-size:13px;line-height:1.5;">
             If you didn’t request this, you can safely ignore this email.<br>
-            © ${new Date().getFullYear()} EliteCafe. All rights reserved.
+            © ${new Date().getFullYear()} CCC — Centurion Coffee Connect. All rights reserved.
           </td>
         </tr>
 

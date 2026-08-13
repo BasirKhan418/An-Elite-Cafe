@@ -127,14 +127,14 @@ const Page = () => {
             >
               <Image
                 src="/logo.png"
-                alt="An Elite Cafe Logo"
+                alt="CCC - Centurion Coffee Connect"
                 width={40}
                 height={40}
-                className="rounded-lg"
+                className="rounded-lg object-contain"
               />
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-gray-900">An Elite Cafe</span>
-                <span className="text-xs text-gray-500">Management System</span>
+                <span className="text-lg font-bold text-gray-900">CCC</span>
+                <span className="text-xs text-gray-500">Centurion Coffee Connect</span>
               </div>
             </motion.div>
             <motion.div
@@ -169,10 +169,10 @@ const Page = () => {
             >
               <Image
                 src="/logo.png"
-                alt="An Elite Cafe"
-                width={120}
-                height={120}
-                className="rounded-2xl shadow-lg"
+                alt="CCC - Centurion Coffee Connect"
+                width={140}
+                height={140}
+                className="rounded-2xl shadow-lg object-contain bg-white"
               />
             </motion.div>
 
@@ -280,13 +280,13 @@ const Page = () => {
             <div className="flex items-center gap-3">
               <Image
                 src="/logo.png"
-                alt="An Elite Cafe"
+                alt="CCC - Centurion Coffee Connect"
                 width={32}
                 height={32}
-                className="rounded-lg"
+                className="rounded-lg object-contain"
               />
               <span className="text-sm text-gray-600">
-                © 2025 An Elite Cafe. All rights reserved.
+                © {new Date().getFullYear()} CCC — Centurion Coffee Connect. All rights reserved.
               </span>
             </div>
           </div>
