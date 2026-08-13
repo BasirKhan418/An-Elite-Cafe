@@ -1,21 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { verifyAdminToken } from "../../../../../../../utils/verify";
 import { fetchTableById } from "../../../../../../../repository/tables/table";
 import { updateTableStatus } from "../../../../../../../repository/tables/tablecrud";
 
-export const dynamic = "force-dynamic"; 
+export const dynamic = "force-dynamic";
 
-export async function GET(
-  request: NextRequest,
-  context: any 
-) {
-  const { tableid } = context.params;
+type RouteContext = {
+  params: Promise<{ tableid: string }> | { tableid: string };
+};
+
+export async function GET(request: NextRequest, context: RouteContext) {
+  const { tableid } = await Promise.resolve(context.params);
 
   try {
-    const adminToken = await headers()
-    const authHeader = adminToken.get("Authorization");
+    const authHeader = (await headers()).get("Authorization");
     const verificationResult = verifyAdminToken(authHeader ?? "");
     if (!verificationResult.success) {
       return NextResponse.json({
@@ -46,16 +45,12 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  context: any
-) {
-  const { tableid } = context.params;
+export async function PUT(request: NextRequest, context: RouteContext) {
+  const { tableid } = await Promise.resolve(context.params);
 
   try {
     const data = await request.json();
-    const adminToken = await headers()
-    const authHeader = adminToken.get("Authorization");
+    const authHeader = (await headers()).get("Authorization");
     const verificationResult = verifyAdminToken(authHeader ?? "");
     if (!verificationResult.success) {
       return NextResponse.json({

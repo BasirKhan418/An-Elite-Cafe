@@ -23,7 +23,10 @@ export const EmployeeZodSchema = z.object({
   username: z.string().optional(),
   email: z.string().email("Invalid email address"),
   role: z.string().min(1, "Role is required"),
-  img: z.string().url("Invalid image URL").optional(),
+  img: z.preprocess(
+    (val) => (val === "" || val === null ? undefined : val),
+    z.string().url("Invalid image URL").optional()
+  ),
   token: z.string().optional(),
   empid: z.string().optional().default(() => Date.now().toString()),
   resname: z.string().optional().default("Centurion Coffee Connect"),

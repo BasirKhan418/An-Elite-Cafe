@@ -43,8 +43,6 @@ const AdminSchema = new mongoose.Schema({
     joinDate: { type: Date, required: false, default: new Date() },
 }, { timestamps: true });
 
-AdminSchema.index({ email: 1 });
-AdminSchema.index({ username: 1 });
 AdminSchema.index({ role: 1 });
 
 export default mongoose.models?.Admin || mongoose.model('Admin', AdminSchema);

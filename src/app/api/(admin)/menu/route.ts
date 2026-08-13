@@ -22,17 +22,16 @@ export async function GET(request: NextRequest) {
         const categoryid = url.searchParams.get("categoryid");
         const statusquery = url.searchParams.get("status");
         const search = url.searchParams.get("search");
+        if (categoryid && search) {
+            const result = await searchByCategoryIdAndTerm(categoryid, search, statusquery || undefined);
+            return NextResponse.json(result, { status: result.success ? 200 : 500 });
+        }
         if(categoryid&&!statusquery&&!search){
             const result = await searchByCategoryId(categoryid);
             return NextResponse.json(result, { status: result.success ? 200 : 500 });
         }
         else if(categoryid&&statusquery&&!search){
             const result = await filterByStatusAndCategoryId(categoryid, statusquery);
-            return NextResponse.json(result, { status: result.success ? 200 : 500 });
-        }
-        else if(categoryid&&statusquery&&search){
-            console.log("here",search,categoryid,statusquery);
-            const result = await searchByCategoryIdAndTerm(categoryid, search, statusquery||"");
             return NextResponse.json(result, { status: result.success ? 200 : 500 });
         }
         const menus = await getAllMenus();

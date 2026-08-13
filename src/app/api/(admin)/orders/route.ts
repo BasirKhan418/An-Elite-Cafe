@@ -79,6 +79,12 @@ export async function PUT(request: NextRequest) {
         
         if (body.orderid && (body.status || body.paymentStatus) && !body.items) {
             const res = await updateOrder(body.orderid, body);
+            if (res.success && (body.status === "cancelled" || body.status === "done") && res.order?.tableid) {
+                const active = await getActiveOrdersByTable(res.order.tableid);
+                if (active.success && (!active.orders || active.orders.length === 0)) {
+                    await changeTableStatus(res.order.tableid, "available");
+                }
+            }
             return NextResponse.json(res, { status: res.success ? 200 : 500 });
         }
         
@@ -87,6 +93,12 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: parseResult.error, success: false, message: "Invalid order data" }, { status: 400 });
         }
         const res = await updateOrder(parseResult.data.orderid || "", parseResult.data);
+        if (res.success && (parseResult.data.status === "cancelled" || parseResult.data.status === "done") && res.order?.tableid) {
+            const active = await getActiveOrdersByTable(res.order.tableid);
+            if (active.success && (!active.orders || active.orders.length === 0)) {
+                await changeTableStatus(res.order.tableid, "available");
+            }
+        }
         return NextResponse.json(res, { status: res.success ? 200 : 500 });
         
     }

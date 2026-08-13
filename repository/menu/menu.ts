@@ -33,15 +33,17 @@ export const filterByStatusAndCategoryId = async (categoryid: string, status: st
 export const searchByCategoryIdAndTerm = async (
   categoryid: string,
   searchTerm: string,
-  status: string
+  status?: string
 ) => {
   try {
     await ConnectDb();
 
     const query: any = {
       category: categoryid,
-      status: status,
     };
+    if (status && status.trim() !== "") {
+      query.status = status;
+    }
     if (searchTerm && searchTerm.trim() !== "") {
       query.name = { $regex: searchTerm, $options: "i" };
     }
