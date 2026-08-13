@@ -29,7 +29,7 @@ try{
         <!-- Header -->
         <tr>
           <td style="background-color:#1f2937;padding:24px;text-align:center;">
-            <img src="${process.env.NEXT_PUBLIC_URL || ""}/logo.png" alt="CCC - Centurion Coffee Connect" style="max-width:140px;height:auto;">
+            <img src="${process.env.NEXT_PUBLIC_URL || ""}/logo.png?v=ccc" alt="CCC - Centurion Coffee Connect" style="max-width:140px;height:auto;">
           </td>
         </tr>
 

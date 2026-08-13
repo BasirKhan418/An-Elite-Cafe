@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "CCC - Centurion Coffee Connect",
   description: "Professional restaurant management system for CCC (Centurion Coffee Connect)",
   icons: {
-    icon: "/logo.png",
+    icon: "/logo.png?v=ccc",
   },
 };
 

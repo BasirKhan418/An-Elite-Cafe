@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import { GlassCard, GlassInput, GlassButton } from '@/components/ui/glass'
 import { ShieldCheck, Coffee, Lock, Mail, Eye, EyeOff } from 'lucide-react'
-import Image from 'next/image';
 
 const AdminLogin: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -73,13 +72,12 @@ const AdminLogin: React.FC = () => {
           {/* Logo and Header */}
           <div className="text-center mb-10">
             <div className="relative inline-block mb-6">
-              <Image
-                src="/logo.png"
+              <img
+                src="/logo.png?v=ccc"
                 alt="CCC - Centurion Coffee Connect"
                 width={160}
                 height={160}
                 className="mx-auto object-contain bg-white rounded-xl"
-                priority
               />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">

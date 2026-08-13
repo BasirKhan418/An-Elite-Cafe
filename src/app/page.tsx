@@ -19,7 +19,6 @@ import {
   ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 const Page = () => {
   const features = [
@@ -125,12 +124,12 @@ const Page = () => {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-3"
             >
-              <Image
-                src="/logo.png"
+              <img
+                src="/logo.png?v=ccc"
                 alt="CCC - Centurion Coffee Connect"
                 width={40}
                 height={40}
-                className="rounded-lg object-contain"
+                className="rounded-lg object-contain bg-white"
               />
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-gray-900">CCC</span>
@@ -167,8 +166,8 @@ const Page = () => {
               transition={{ delay: 0.2 }}
               className="flex justify-center mb-8"
             >
-              <Image
-                src="/logo.png"
+              <img
+                src="/logo.png?v=ccc"
                 alt="CCC - Centurion Coffee Connect"
                 width={140}
                 height={140}
@@ -278,12 +277,12 @@ const Page = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
-              <Image
-                src="/logo.png"
+              <img
+                src="/logo.png?v=ccc"
                 alt="CCC - Centurion Coffee Connect"
                 width={32}
                 height={32}
-                className="rounded-lg object-contain"
+                className="rounded-lg object-contain bg-white"
               />
               <span className="text-sm text-gray-600">
                 © {new Date().getFullYear()} CCC — Centurion Coffee Connect. All rights reserved.
